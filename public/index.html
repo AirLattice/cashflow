@@ -109,98 +109,6 @@
         </div>
       </section>
 
-      <section class="panel permission-section" data-permission="fixed_expenses">
-        <div class="panel-head">
-          <h2>고정 지출</h2>
-          <div class="inline">
-            <input type="month" id="fixed-month" />
-            <button id="fixed-load" type="button">불러오기</button>
-            <a class="ghost-link" href="/fixed-expenses.html">관리</a>
-          </div>
-        </div>
-        <form id="fixed-form" class="form grid">
-          <label>
-            항목
-            <input type="text" name="name" required />
-          </label>
-          <label>
-            총액 (원)
-            <input
-              type="text"
-              name="total_amount_cents"
-              inputmode="numeric"
-              autocomplete="off"
-              data-money="true"
-              required
-            />
-          </label>
-          <label>
-            월별 금액 (원)
-            <input
-              type="text"
-              name="per_month_cents"
-              inputmode="numeric"
-              autocomplete="off"
-              data-money="true"
-              required
-            />
-          </label>
-          <label>
-            시작일
-            <input type="date" name="start_date" required />
-          </label>
-          <label>
-            종료일
-            <input type="date" name="end_date" required />
-          </label>
-          <label>
-            지급 방식
-            <select name="payment_type">
-              <option value="single">일시</option>
-              <option value="installments">분할</option>
-            </select>
-          </label>
-          <label>
-            분할 횟수
-            <input type="number" name="installments_count" min="1" />
-          </label>
-          <button type="submit">지출 추가</button>
-        </form>
-        <div id="fixed-list" class="list"></div>
-      </section>
-
-      <section class="panel permission-section" data-permission="incomes">
-        <div class="panel-head">
-          <h2>수입</h2>
-          <div class="inline">
-            <input type="month" id="income-month" />
-            <button id="income-load" type="button">불러오기</button>
-          </div>
-        </div>
-        <form id="income-form" class="form grid">
-          <label>
-            항목
-            <input type="text" name="name" required />
-          </label>
-          <label>
-            금액 (원)
-            <input
-              type="text"
-              name="amount_cents"
-              inputmode="numeric"
-              autocomplete="off"
-              data-money="true"
-              required
-            />
-          </label>
-          <label>
-            수입일
-            <input type="date" name="income_date" required />
-          </label>
-          <button type="submit">수입 추가</button>
-        </form>
-        <div id="income-list" class="list"></div>
-      </section>
       <section id="no-access" class="panel hidden">
         <h2>권한 필요</h2>
         <p class="subhead">관리자가 권한을 부여해야 내용을 볼 수 있습니다.</p>
@@ -209,6 +117,7 @@
 
     <script src="/nav.js"></script>
     <script src="/form-utils.js"></script>
+    <script src="/api.js"></script>
     <script src="/app.js"></script>
   </body>
 </html>

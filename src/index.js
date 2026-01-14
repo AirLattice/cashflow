@@ -21,7 +21,13 @@ import { listIncomes, createIncome, updateIncome, deleteIncome } from "./routes/
 import { getSummary } from "./routes/summary.js";
 import { requireAuth } from "./middleware/auth.js";
 import { requireAdmin, requirePermission } from "./middleware/permissions.js";
-import { listUsers, updateUserPermissions, getSettings, updateSettings } from "./routes/admin.js";
+import {
+  listUsers,
+  updateUserPermissions,
+  getSettings,
+  updateSettings,
+  listGroups
+} from "./routes/admin.js";
 import { query } from "./db.js";
 
 const app = express();
@@ -75,6 +81,7 @@ app.get("/summary", requireAuth, requirePermission("summary"), getSummary);
 
 app.get("/admin/users", requireAuth, requireAdmin, listUsers);
 app.put("/admin/users/:id/permissions", requireAuth, requireAdmin, updateUserPermissions);
+app.get("/admin/groups", requireAuth, requireAdmin, listGroups);
 app.get("/admin/settings", requireAuth, requireAdmin, getSettings);
 app.put("/admin/settings", requireAuth, requireAdmin, updateSettings);
 
@@ -82,14 +89,25 @@ async function ensureAdminSeed(attempt = 0) {
   try {
     const result = await query("select id from users where username = 'admin' limit 1");
     if (result.rows.length === 0) {
+      const groupResult = await query(
+        "select id from groups where name = 'family' limit 1"
+      );
+      const groupId = groupResult.rows[0]?.id;
+      if (!groupId) {
+        throw new Error("group not initialized");
+      }
       const passwordHash = await bcrypt.hash("admin", 12);
       const userResult = await query(
-        "insert into users (username, password_hash, role) values ('admin', $1, 'admin') returning id",
-        [passwordHash]
+        "insert into users (username, password_hash, role, active_group_id) values ('admin', $1, 'admin', $2) returning id",
+        [passwordHash, groupId]
       );
       await query(
         "insert into user_permissions (user_id, can_view_fixed_expenses, can_view_incomes, can_view_summary) values ($1, true, true, true) on conflict do nothing",
         [userResult.rows[0].id]
+      );
+      await query(
+        "insert into user_group_access (user_id, group_id) values ($1, $2) on conflict do nothing",
+        [userResult.rows[0].id, groupId]
       );
     }
   } catch (err) {

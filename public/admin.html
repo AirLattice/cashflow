@@ -25,7 +25,12 @@
         </div>
       </header>
 
-      <section class="panel">
+      <section id="admin-denied" class="panel hidden">
+        <h2>접근 불가</h2>
+        <p class="subhead">관리자만 접근할 수 있습니다. 로그인 상태를 확인해주세요.</p>
+      </section>
+
+      <section id="admin-panel" class="panel">
         <p id="admin-status" class="status">로딩 중...</p>
         <form id="settings-form" class="form">
           <h2>월 기준 설정</h2>
@@ -41,6 +46,7 @@
     </main>
 
     <script src="/nav.js"></script>
+    <script src="/api.js"></script>
     <script src="/admin.js"></script>
   </body>
 </html>

@@ -1,8 +1,22 @@
+create table if not exists groups (
+  id bigserial primary key,
+  name text not null unique,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists user_group_access (
+  user_id bigint not null references users(id) on delete cascade,
+  group_id bigint not null references groups(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, group_id)
+);
+
 create table if not exists users (
   id bigserial primary key,
   username text not null unique,
   role text not null default 'user',
   password_hash text not null,
+  active_group_id bigint references groups(id),
   created_at timestamptz not null default now()
 );
 
@@ -32,6 +46,7 @@ create table if not exists app_settings (
 create table if not exists fixed_expenses (
   id bigserial primary key,
   user_id bigint not null references users(id) on delete cascade,
+  group_id bigint not null references groups(id),
   name text not null,
   total_amount_cents integer not null,
   per_month_cents integer not null,
@@ -49,6 +64,7 @@ create table if not exists fixed_expenses (
 create table if not exists incomes (
   id bigserial primary key,
   user_id bigint not null references users(id) on delete cascade,
+  group_id bigint not null references groups(id),
   name text not null,
   amount_cents integer not null,
   income_date date not null,

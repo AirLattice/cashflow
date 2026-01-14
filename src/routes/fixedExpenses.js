@@ -2,11 +2,14 @@ import { query } from "../db.js";
 import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
 
 export async function listFixedExpenses(req, res) {
+  if (!req.user.group_id) {
+    return res.status(400).json({ error: "group not set" });
+  }
   const fetchAll = req.query.all === "1" || req.query.all === "true";
   let result;
   if (fetchAll) {
-    result = await query("select * from fixed_expenses where user_id = $1 order by id desc", [
-      req.user.id
+    result = await query("select * from fixed_expenses where group_id = $1 order by id desc", [
+      req.user.group_id
     ]);
   } else {
     const monthStartDay = await getMonthStartDay();
@@ -15,8 +18,8 @@ export async function listFixedExpenses(req, res) {
       return res.status(400).json({ error: "invalid month format, use YYYY-MM" });
     }
     result = await query(
-      "select * from fixed_expenses where user_id = $1 and start_date <= $2 and end_date >= $3 order by id desc",
-      [req.user.id, monthRange.end, monthRange.start]
+      "select * from fixed_expenses where group_id = $1 and start_date <= $2 and end_date >= $3 order by id desc",
+      [req.user.group_id, monthRange.end, monthRange.start]
     );
   }
 
@@ -24,6 +27,9 @@ export async function listFixedExpenses(req, res) {
 }
 
 export async function createFixedExpense(req, res) {
+  if (!req.user.group_id) {
+    return res.status(400).json({ error: "group not set" });
+  }
   const {
     name,
     total_amount_cents,
@@ -43,9 +49,10 @@ export async function createFixedExpense(req, res) {
   }
 
   const result = await query(
-    "insert into fixed_expenses (user_id, name, total_amount_cents, per_month_cents, start_date, end_date, payment_type, installments_count, interest_rate, total_interest_cents, total_with_interest_cents, remaining_cents) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning *",
+    "insert into fixed_expenses (user_id, group_id, name, total_amount_cents, per_month_cents, start_date, end_date, payment_type, installments_count, interest_rate, total_interest_cents, total_with_interest_cents, remaining_cents) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) returning *",
     [
       req.user.id,
+      req.user.group_id,
       name,
       total_amount_cents,
       per_month_cents,
@@ -64,6 +71,9 @@ export async function createFixedExpense(req, res) {
 }
 
 export async function updateFixedExpense(req, res) {
+  if (!req.user.group_id) {
+    return res.status(400).json({ error: "group not set" });
+  }
   const {
     name,
     total_amount_cents,
@@ -83,7 +93,7 @@ export async function updateFixedExpense(req, res) {
   }
 
   const result = await query(
-    "update fixed_expenses set name = $1, total_amount_cents = $2, per_month_cents = $3, start_date = $4, end_date = $5, payment_type = $6, installments_count = $7, interest_rate = $8, total_interest_cents = $9, total_with_interest_cents = $10, remaining_cents = $11 where id = $12 and user_id = $13 returning *",
+    "update fixed_expenses set name = $1, total_amount_cents = $2, per_month_cents = $3, start_date = $4, end_date = $5, payment_type = $6, installments_count = $7, interest_rate = $8, total_interest_cents = $9, total_with_interest_cents = $10, remaining_cents = $11 where id = $12 and group_id = $13 returning *",
     [
       name,
       total_amount_cents,
@@ -97,7 +107,7 @@ export async function updateFixedExpense(req, res) {
       total_with_interest_cents || null,
       remaining_cents || null,
       req.params.id,
-      req.user.id
+      req.user.group_id
     ]
   );
 
@@ -110,9 +120,12 @@ export async function updateFixedExpense(req, res) {
 }
 
 export async function deleteFixedExpense(req, res) {
+  if (!req.user.group_id) {
+    return res.status(400).json({ error: "group not set" });
+  }
   const result = await query(
-    "delete from fixed_expenses where id = $1 and user_id = $2 returning id",
-    [req.params.id, req.user.id]
+    "delete from fixed_expenses where id = $1 and group_id = $2 returning id",
+    [req.params.id, req.user.group_id]
   );
 
   if (result.rowCount === 0) {

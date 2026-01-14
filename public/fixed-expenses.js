@@ -32,35 +32,13 @@ async function refreshSession() {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    },
-    credentials: "include"
+  const requestWithRefresh = window.ApiClient?.requestWithRefresh;
+  if (!requestWithRefresh) {
+    throw new Error("API client not available");
+  }
+  return requestWithRefresh(path, options, refreshSession, () => {
+    throw new Error("로그인이 필요합니다.");
   });
-
-  if (response.status === 401 && !options._retried) {
-    try {
-      await refreshSession();
-      return api(path, { ...options, _retried: true });
-    } catch (err) {
-      throw new Error("로그인이 필요합니다.");
-    }
-  }
-
-  if (!response.ok) {
-    let payload;
-    try {
-      payload = await response.json();
-    } catch (err) {
-      payload = { error: "요청 실패" };
-    }
-    throw new Error(payload.error || "요청 실패");
-  }
-
-  return response.json();
 }
 
 function toNumber(value) {
@@ -196,28 +174,53 @@ function renderItems(items) {
     return;
   }
 
+  const formatDateValue = (value) => {
+    if (!value) {
+      return "";
+    }
+    return String(value).slice(0, 10);
+  };
+
   listEl.innerHTML = items
     .map((item) => {
       itemsById.set(String(item.id), item);
       return `
       <div class="card-row fixed-row" data-id="${item.id}">
-        <div>
-          <strong>${item.name}</strong>
-          <small>구매금액 ${formatter.format(item.total_amount_cents)}원 · 월 ${formatter.format(
-        item.per_month_cents
-      )}원</small>
-        </div>
         <label class="inline-field">
-          <span>선택</span>
           <input type="checkbox" class="fixed-select" data-id="${item.id}" />
         </label>
+        <div class="fixed-info">
+          <strong>${item.name}</strong>
+          <div class="amount-split">
+            <div>
+              <small>구매금액</small>
+              <div>${formatter.format(item.total_amount_cents)}원</div>
+            </div>
+            <div>
+              <small>월 금액</small>
+              <div>${formatter.format(item.per_month_cents)}원</div>
+            </div>
+          </div>
+        </div>
         <label class="inline-field">
           <span>첫 결제일</span>
-          <input type="date" name="start_date" value="${item.start_date}" data-field="start_date" required />
+          <input
+            type="date"
+            name="start_date"
+            value="${formatDateValue(item.start_date)}"
+            data-field="start_date"
+            required
+          />
         </label>
         <label class="inline-field">
           <span>마지막 결제일</span>
-          <input type="date" name="end_date" value="${item.end_date}" data-field="end_date" required />
+          <input
+            type="date"
+            name="end_date"
+            value="${formatDateValue(item.end_date)}"
+            data-field="end_date"
+            required
+          />
         </label>
       </div>
     `;
@@ -413,7 +416,12 @@ async function init() {
     const me = await api("/auth/me");
     const permissions = me.permissions || {};
     if (typeof window.initNav === "function") {
-      window.initNav({ permissions, role: me.role, isAuthenticated: true });
+      window.initNav({
+        permissions,
+        role: me.role,
+        isAuthenticated: true,
+        username: me.username
+      });
     }
     if (!(me.role === "admin" || permissions.fixed_expenses)) {
       setStatus("고정 지출 권한이 없습니다.");

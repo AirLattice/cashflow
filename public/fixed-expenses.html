@@ -28,15 +28,15 @@
       <section class="panel">
         <p id="fixed-status" class="hint">로딩 중...</p>
         <div class="list-controls">
-          <button id="fixed-add-toggle" type="button">추가</button>
           <label class="inline-field">
             <input type="checkbox" id="fixed-select-all" />
             <span>모두선택</span>
           </label>
           <button id="fixed-clear-selection" class="ghost" type="button">모두해제</button>
           <button id="fixed-delete-selected" class="ghost" type="button">삭제</button>
+          <button id="fixed-add-toggle" class="push-right" type="button">추가</button>
         </div>
-        <form id="fixed-create-form" class="form grid hidden">
+        <form id="fixed-create-form" class="form grid fixed-create-form hidden">
           <label class="input-highlight">
             항목명
             <input type="text" name="name" required />
@@ -116,6 +116,7 @@
 
     <script src="/nav.js"></script>
     <script src="/form-utils.js"></script>
+    <script src="/api.js"></script>
     <script src="/fixed-expenses.js"></script>
   </body>
 </html>

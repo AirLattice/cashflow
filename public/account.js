@@ -47,35 +47,11 @@ async function refreshSession() {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    },
-    credentials: "include"
-  });
-
-  if (response.status === 401 && !options._retried) {
-    try {
-      await refreshSession();
-      return api(path, { ...options, _retried: true });
-    } catch (err) {
-      setLoggedIn(false);
-    }
+  const requestWithRefresh = window.ApiClient?.requestWithRefresh;
+  if (!requestWithRefresh) {
+    throw new Error("API client not available");
   }
-
-  if (!response.ok) {
-    let payload;
-    try {
-      payload = await response.json();
-    } catch (err) {
-      payload = { error: "요청 실패" };
-    }
-    throw new Error(payload.error || "요청 실패");
-  }
-
-  return response.json();
+  return requestWithRefresh(path, options, refreshSession, () => setLoggedIn(false));
 }
 
 async function handleLogout() {
@@ -145,7 +121,12 @@ api("/auth/me")
     }
     setLoggedIn(true, data.username);
     if (typeof window.initNav === "function") {
-      window.initNav({ permissions: data.permissions || {}, role: data.role, isAuthenticated: true });
+      window.initNav({
+        permissions: data.permissions || {},
+        role: data.role,
+        isAuthenticated: true,
+        username: data.username
+      });
     }
   })
   .catch(() => {

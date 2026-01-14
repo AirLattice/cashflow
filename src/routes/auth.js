@@ -12,7 +12,7 @@ function signAccessToken(userId) {
 }
 
 function signRefreshToken(userId) {
-  return jwt.sign({}, process.env.JWT_REFRESH_SECRET, {
+  return jwt.sign({ jti: crypto.randomUUID() }, process.env.JWT_REFRESH_SECRET, {
     subject: String(userId),
     expiresIn: "7d"
   });
@@ -65,13 +65,24 @@ export async function register(req, res) {
 
   const passwordHash = await bcrypt.hash(password, 12);
   try {
+    const groupResult = await query(
+      "select id from groups where name = 'family' limit 1"
+    );
+    const groupId = groupResult.rows[0]?.id;
+    if (!groupId) {
+      return res.status(500).json({ error: "group not initialized" });
+    }
     const result = await query(
-      "insert into users (username, password_hash, role) values ($1, $2, 'user') returning id",
-      [username, passwordHash]
+      "insert into users (username, password_hash, role, active_group_id) values ($1, $2, 'user', $3) returning id",
+      [username, passwordHash, groupId]
     );
     await query("insert into user_permissions (user_id) values ($1)", [
       result.rows[0].id
     ]);
+    await query(
+      "insert into user_group_access (user_id, group_id) values ($1, $2) on conflict do nothing",
+      [result.rows[0].id, groupId]
+    );
     return res.status(201).json({ id: result.rows[0].id, username });
   } catch (err) {
     if (err.code === "23505") {
@@ -87,12 +98,30 @@ export async function login(req, res) {
     return res.status(400).json({ error: "username and password required" });
   }
 
-  const result = await query("select id, password_hash from users where username = $1", [
-    username
-  ]);
+  const result = await query(
+    "select id, password_hash, active_group_id from users where username = $1",
+    [username]
+  );
   const user = result.rows[0];
   if (!user) {
     return res.status(401).json({ error: "invalid credentials" });
+  }
+
+  if (user.active_group_id === null) {
+    const groupResult = await query(
+      "select id from groups where name = 'family' limit 1"
+    );
+    const groupId = groupResult.rows[0]?.id;
+    if (groupId) {
+      await query("update users set active_group_id = $1 where id = $2", [
+        groupId,
+        user.id
+      ]);
+      await query(
+        "insert into user_group_access (user_id, group_id) values ($1, $2) on conflict do nothing",
+        [user.id, groupId]
+      );
+    }
   }
 
   const ok = await bcrypt.compare(password, user.password_hash);
@@ -155,7 +184,7 @@ export async function logout(req, res) {
 
 export async function me(req, res) {
   const result = await query(
-    "select u.id, u.username, u.role, p.can_view_fixed_expenses, p.can_view_incomes, p.can_view_summary from users u left join user_permissions p on u.id = p.user_id where u.id = $1",
+    "select u.id, u.username, u.role, u.active_group_id, g.name as group_name, p.can_view_fixed_expenses, p.can_view_incomes, p.can_view_summary from users u left join groups g on u.active_group_id = g.id left join user_permissions p on u.id = p.user_id where u.id = $1",
     [req.user.id]
   );
   const user = result.rows[0];
@@ -167,6 +196,8 @@ export async function me(req, res) {
     id: user.id,
     username: user.username,
     role: user.role,
+    active_group_id: user.active_group_id,
+    group_name: user.group_name,
     permissions: {
       fixed_expenses: Boolean(user.can_view_fixed_expenses),
       incomes: Boolean(user.can_view_incomes),
