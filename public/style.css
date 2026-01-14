@@ -374,6 +374,29 @@ button.ghost {
   grid-template-columns: 1fr 1.3fr 1fr;
 }
 
+.fixed-row {
+  grid-template-columns: 1.3fr 1fr 1fr auto;
+}
+
+.inline-field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.inline-field input {
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .admin-controls {
   display: flex;
   gap: 12px;

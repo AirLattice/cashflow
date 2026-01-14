@@ -9,6 +9,7 @@ const changePasswordForm = document.getElementById("change-password-form");
 const deleteAccountForm = document.getElementById("delete-account-form");
 const adminLink = document.getElementById("admin-link");
 const adminTopLink = document.getElementById("admin-top-link");
+const fixedManageLink = document.getElementById("fixed-manage-link");
 const summaryBtn = document.getElementById("summary-btn");
 const summaryMonth = document.getElementById("summary-month");
 const summaryIncome = document.getElementById("summary-income");
@@ -66,6 +67,9 @@ function setLoggedIn(isLoggedIn, username, role) {
     authPanel.classList.remove("hidden");
     userMenuBtn.classList.add("hidden");
     userMenuPanel.classList.add("hidden");
+    if (fixedManageLink) {
+      fixedManageLink.classList.add("hidden");
+    }
     if (mainLayout) {
       mainLayout.classList.add("hidden");
       mainLayout.style.display = "none";
@@ -91,6 +95,9 @@ function applyPermissions(permissions, role) {
   const isAdmin = role === "admin";
   currentPermissions = allowed;
   currentRole = role;
+  if (fixedManageLink) {
+    fixedManageLink.classList.toggle("hidden", !(isAdmin || allowed.fixed_expenses));
+  }
   let anyVisible = false;
   permissionSections.forEach((section) => {
     const key = section.dataset.permission;
@@ -408,27 +415,7 @@ function renderIncome(items) {
     incomeList.innerHTML = "<p>등록된 수입이 없습니다.</p>";
     return;
   }
-  incomeList.innerHTML = items
-    .map(
-      (item) => `
-      <div class="card-row">
-        <div>
-          <strong>${item.name}</strong>
-          <small>${item.income_date}</small>
-        </div>
-        <div>
-          <small>금액</small>
-          <div>${formatter.format(item.amount_cents)}</div>
-        </div>
-        <div>
-          <small>등록번호</small>
-          <div>#${item.id}</div>
-        </div>
-        <button class="ghost" data-action="delete-income" data-id="${item.id}">삭제</button>
-      </div>
-    `
-    )
-    .join("");
+  incomeList.innerHTML = "";
 }
 
 async function loadIncome() {

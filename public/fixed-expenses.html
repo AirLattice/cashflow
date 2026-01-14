@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>고정 지출 관리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <p class="eyebrow">고정 지출 관리</p>
+        <div class="auth-actions">
+          <a class="ghost-link" href="/">대시보드로</a>
+        </div>
+      </div>
+    </div>
+
+    <main class="page-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">고정 지출</p>
+          <h1>고정 지출 관리</h1>
+          <p class="subhead">고정 지출의 시작일과 마지막 지출일을 수정하거나 삭제합니다.</p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <p id="fixed-status" class="hint">로딩 중...</p>
+        <form id="fixed-create-form" class="form grid">
+          <label>
+            항목명
+            <input type="text" name="name" required />
+          </label>
+          <label>
+            고정지출 종류
+            <select name="payment_type" required>
+              <option value="installment">할부</option>
+              <option value="loan">대출</option>
+            </select>
+          </label>
+          <label>
+            할부 개월수
+            <input type="number" name="installments_count" min="1" required />
+          </label>
+          <label>
+            이자율 (%)
+            <input type="number" name="interest_rate" min="0" step="0.01" required />
+          </label>
+          <label>
+            결제 금액 (원)
+            <input type="number" name="per_month_cents" min="0" required />
+          </label>
+          <label>
+            시작일
+            <input type="date" name="start_date" required />
+          </label>
+          <label>
+            마지막 지출일
+            <input type="date" name="end_date" required />
+          </label>
+          <label>
+            전체 금액 (원)
+            <input type="number" name="total_amount_cents" min="0" required />
+          </label>
+          <label>
+            전체 이자 금액 (원)
+            <input type="number" name="total_interest_cents" min="0" />
+          </label>
+          <label>
+            전체 이자+원금 (원)
+            <input type="number" name="total_with_interest_cents" min="0" />
+          </label>
+          <label>
+            남은 금액 (원)
+            <input type="number" name="remaining_cents" min="0" />
+          </label>
+          <button type="submit">고정 지출 추가</button>
+        </form>
+        <div id="fixed-list" class="list"></div>
+      </section>
+    </main>
+
+    <script src="/fixed-expenses.js"></script>
+  </body>
+</html>

@@ -39,6 +39,10 @@ create table if not exists fixed_expenses (
   end_date date not null,
   payment_type text not null default 'single',
   installments_count integer,
+  interest_rate numeric,
+  total_interest_cents integer,
+  total_with_interest_cents integer,
+  remaining_cents integer,
   created_at timestamptz not null default now()
 );
 
