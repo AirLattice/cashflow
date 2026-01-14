@@ -64,3 +64,28 @@ export async function updateUserPermissions(req, res) {
 
   return res.json({ ok: true });
 }
+
+export async function getSettings(req, res) {
+  const result = await query("select month_start_day from app_settings where id = 1");
+  if (result.rows.length === 0) {
+    await query(
+      "insert into app_settings (id, month_start_day) values (1, 1) on conflict do nothing"
+    );
+    return res.json({ month_start_day: 1 });
+  }
+  return res.json({ month_start_day: Number(result.rows[0].month_start_day || 1) });
+}
+
+export async function updateSettings(req, res) {
+  const { month_start_day } = req.body;
+  const value = Number(month_start_day);
+  if (!Number.isInteger(value) || value < 1 || value > 28) {
+    return res.status(400).json({ error: "month_start_day must be 1-28" });
+  }
+
+  await query(
+    "insert into app_settings (id, month_start_day, updated_at) values (1, $1, now()) on conflict (id) do update set month_start_day = excluded.month_start_day, updated_at = now()",
+    [value]
+  );
+  return res.json({ ok: true, month_start_day: value });
+}

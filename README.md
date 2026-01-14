@@ -27,6 +27,8 @@ Admin page: http://localhost:8081/admin.html
 Admin:
 - GET /admin/users
 - PUT /admin/users/:id/permissions { "role": "admin|user", "can_view_fixed_expenses": true, "can_view_incomes": true, "can_view_summary": true }
+- GET /admin/settings
+- PUT /admin/settings { "month_start_day": 15 }
 
 Cookies:
 - access_token (1 hour)
@@ -45,6 +47,10 @@ Permissions:
 - New users start with no access to fixed expenses, incomes, or summary.
 - Admin must grant permissions via the admin page.
 
+Month 기준:
+- `month_start_day` 값을 기준으로 월 집계 기간을 계산합니다.
+- 예: 15로 설정하면 15일~다음달 14일이 한 달입니다.
+
 ## Migration (existing DB)
 
 If you created accounts before switching to `username`, run:
@@ -57,6 +63,12 @@ Permissions/roles migration:
 
 ```bash
 cat migrations/002_roles_permissions.sql | docker compose exec -T db psql -U postgres -d cashflow
+```
+
+Month 기준 설정 migration:
+
+```bash
+cat migrations/003_month_start_day.sql | docker compose exec -T db psql -U postgres -d cashflow
 ```
 
 ## Fixed expenses

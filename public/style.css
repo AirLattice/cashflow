@@ -63,15 +63,8 @@ body {
   display: block;
 }
 
-.requires-auth-grid {
-  display: none;
-}
-
-.is-authenticated .requires-auth-grid {
-  display: grid;
-}
-
 .user-menu {
+  margin-left: auto;
   position: relative;
 }
 
@@ -226,6 +219,7 @@ button.ghost {
 }
 
 .status {
+  display: none;
   margin: 12px 0 0;
   color: var(--muted);
   font-size: 0.9rem;
@@ -257,9 +251,13 @@ button.ghost {
 }
 
 .layout {
-  display: grid;
+  display: none;
   gap: 24px;
   padding: 0 6vw 64px;
+}
+
+.is-authenticated .layout {
+  display: grid;
 }
 
 .panel {

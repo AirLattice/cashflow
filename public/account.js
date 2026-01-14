@@ -13,7 +13,7 @@ function setStatus(message) {
 
 function setLoggedIn(isLoggedIn, username) {
   if (isLoggedIn) {
-    setStatus("로그인됨");
+    setStatus("");
     logoutBtn.classList.remove("hidden");
     accountPanel.classList.remove("hidden");
     if (username) {

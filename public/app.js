@@ -31,9 +31,12 @@ const incomeLoad = document.getElementById("income-load");
 const tabs = document.querySelectorAll(".tab");
 const permissionSections = document.querySelectorAll(".permission-section");
 const noAccessPanel = document.getElementById("no-access");
+const mainLayout = document.querySelector("main.layout");
 
 const formatter = new Intl.NumberFormat("ko-KR");
 let refreshInFlight = null;
+let currentPermissions = {};
+let currentRole = null;
 
 function setStatus(message) {
   authStatus.textContent = message;
@@ -41,10 +44,14 @@ function setStatus(message) {
 
 function setLoggedIn(isLoggedIn, username, role) {
   if (isLoggedIn) {
-    setStatus("로그인됨");
+    setStatus("");
     authPanel.classList.add("hidden");
     userMenuBtn.textContent = username || "내 계정";
     userMenuBtn.classList.remove("hidden");
+    if (mainLayout) {
+      mainLayout.classList.remove("hidden");
+      mainLayout.style.display = "grid";
+    }
     document.body.classList.add("is-authenticated");
     if (role === "admin") {
       adminLink.classList.remove("hidden");
@@ -55,18 +62,35 @@ function setLoggedIn(isLoggedIn, username, role) {
     }
   } else {
     setStatus("로그인 필요");
+    setTab("login");
     authPanel.classList.remove("hidden");
     userMenuBtn.classList.add("hidden");
     userMenuPanel.classList.add("hidden");
+    if (mainLayout) {
+      mainLayout.classList.add("hidden");
+      mainLayout.style.display = "none";
+    }
     document.body.classList.remove("is-authenticated");
     adminLink.classList.add("hidden");
     adminTopLink.classList.add("hidden");
+    noAccessPanel.classList.add("hidden");
+    summaryIncome.textContent = "-";
+    summaryExpenses.textContent = "-";
+    summaryBalance.textContent = "-";
+    incomeBar.style.width = "0%";
+    expenseBar.style.width = "0%";
+    incomeBarValue.textContent = "-";
+    expenseBarValue.textContent = "-";
+    fixedList.innerHTML = "";
+    incomeList.innerHTML = "";
   }
 }
 
 function applyPermissions(permissions, role) {
   const allowed = permissions || {};
   const isAdmin = role === "admin";
+  currentPermissions = allowed;
+  currentRole = role;
   let anyVisible = false;
   permissionSections.forEach((section) => {
     const key = section.dataset.permission;
@@ -77,6 +101,50 @@ function applyPermissions(permissions, role) {
     }
   });
   noAccessPanel.classList.toggle("hidden", anyVisible);
+}
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+function getCurrentMonthKey(monthStartDay) {
+  const today = new Date();
+  let year = today.getFullYear();
+  let monthIndex = today.getMonth();
+  if (today.getDate() < monthStartDay) {
+    monthIndex -= 1;
+    if (monthIndex < 0) {
+      monthIndex = 11;
+      year -= 1;
+    }
+  }
+  return `${year}-${pad(monthIndex + 1)}`;
+}
+
+function setDefaultMonthInputs(monthStartDay) {
+  const key = getCurrentMonthKey(monthStartDay);
+  summaryMonth.value = key;
+  chartMonth.value = key;
+  fixedMonth.value = key;
+  incomeMonth.value = key;
+}
+
+async function loadInitialData() {
+  const isAdmin = currentRole === "admin";
+  const canSummary = isAdmin || currentPermissions.summary;
+  const canFixed = isAdmin || currentPermissions.fixed_expenses;
+  const canIncome = isAdmin || currentPermissions.incomes;
+
+  if (canSummary) {
+    await loadSummary();
+    await loadChart();
+  }
+  if (canFixed) {
+    await loadFixed();
+  }
+  if (canIncome) {
+    await loadIncome();
+  }
 }
 
 function setTab(name) {
@@ -229,6 +297,9 @@ async function loadProfile() {
     }
     setLoggedIn(true, data.username, data.role);
     applyPermissions(data.permissions || {}, data.role);
+    const monthStartDay = Number(data.month_start_day || 1);
+    setDefaultMonthInputs(monthStartDay);
+    await loadInitialData();
   } catch (err) {
     setLoggedIn(false);
     applyPermissions({});

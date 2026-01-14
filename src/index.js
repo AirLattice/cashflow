@@ -21,7 +21,7 @@ import { listIncomes, createIncome, updateIncome, deleteIncome } from "./routes/
 import { getSummary } from "./routes/summary.js";
 import { requireAuth } from "./middleware/auth.js";
 import { requireAdmin, requirePermission } from "./middleware/permissions.js";
-import { listUsers, updateUserPermissions } from "./routes/admin.js";
+import { listUsers, updateUserPermissions, getSettings, updateSettings } from "./routes/admin.js";
 import { query } from "./db.js";
 
 const app = express();
@@ -75,6 +75,8 @@ app.get("/summary", requireAuth, requirePermission("summary"), getSummary);
 
 app.get("/admin/users", requireAuth, requireAdmin, listUsers);
 app.put("/admin/users/:id/permissions", requireAuth, requireAdmin, updateUserPermissions);
+app.get("/admin/settings", requireAuth, requireAdmin, getSettings);
+app.put("/admin/settings", requireAuth, requireAdmin, updateSettings);
 
 async function ensureAdminSeed(attempt = 0) {
   try {

@@ -34,6 +34,15 @@
 
       <section class="panel">
         <p id="admin-status" class="status">로딩 중...</p>
+        <form id="settings-form" class="form">
+          <h2>월 기준 설정</h2>
+          <label>
+            월 시작일 (1~28)
+            <input type="number" id="month-start-day" min="1" max="28" required />
+          </label>
+          <button type="submit">저장</button>
+          <p class="hint">예: 15로 설정하면 15일~다음달 14일을 한 달로 집계합니다.</p>
+        </form>
         <div id="admin-table" class="list"></div>
       </section>
     </main>

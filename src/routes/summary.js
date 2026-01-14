@@ -1,21 +1,11 @@
 import { query } from "../db.js";
-
-function parseMonth(month) {
-  const [yearStr, monthStr] = (month || "").split("-");
-  const year = Number(yearStr);
-  const monthIndex = Number(monthStr) - 1;
-  if (!year || monthIndex < 0 || monthIndex > 11) {
-    return null;
-  }
-  const start = new Date(Date.UTC(year, monthIndex, 1));
-  const end = new Date(Date.UTC(year, monthIndex + 1, 0));
-  return { start, end };
-}
+import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
 
 export async function getSummary(req, res) {
-  const monthRange = parseMonth(req.query.month);
+  const monthStartDay = await getMonthStartDay();
+  const monthRange = getPeriodRange(monthStartDay, req.query.month);
   if (!monthRange) {
-    return res.status(400).json({ error: "month query required, format YYYY-MM" });
+    return res.status(400).json({ error: "invalid month format, use YYYY-MM" });
   }
 
   const expensesResult = await query(
@@ -31,7 +21,9 @@ export async function getSummary(req, res) {
   const totalIncome = Number(incomesResult.rows[0].total || 0);
 
   return res.json({
-    month: req.query.month,
+    month: monthRange.label,
+    period_start: monthRange.start,
+    period_end: monthRange.end,
     total_income_cents: totalIncome,
     total_fixed_expense_cents: totalExpenses,
     balance_cents: totalIncome - totalExpenses

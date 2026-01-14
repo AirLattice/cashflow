@@ -1,5 +1,7 @@
 const statusEl = document.getElementById("admin-status");
 const tableEl = document.getElementById("admin-table");
+const settingsForm = document.getElementById("settings-form");
+const monthStartDayInput = document.getElementById("month-start-day");
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -77,6 +79,15 @@ async function loadUsers() {
   }
 }
 
+async function loadSettings() {
+  try {
+    const data = await api("/admin/settings");
+    monthStartDayInput.value = data.month_start_day || 1;
+  } catch (err) {
+    setStatus(err.message);
+  }
+}
+
 async function init() {
   try {
     const me = await api("/auth/me");
@@ -84,6 +95,7 @@ async function init() {
       setStatus("관리자만 접근할 수 있습니다.");
       return;
     }
+    await loadSettings();
     await loadUsers();
   } catch (err) {
     setStatus(err.message);
@@ -109,6 +121,20 @@ tableEl.addEventListener("click", async (event) => {
       body: JSON.stringify({ role, ...perms })
     });
     setStatus("저장 완료");
+  } catch (err) {
+    setStatus(err.message);
+  }
+});
+
+settingsForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const value = Number(monthStartDayInput.value);
+  try {
+    await api("/admin/settings", {
+      method: "PUT",
+      body: JSON.stringify({ month_start_day: value })
+    });
+    setStatus("월 기준이 저장되었습니다.");
   } catch (err) {
     setStatus(err.message);
   }

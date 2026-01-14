@@ -1,31 +1,17 @@
 import { query } from "../db.js";
-
-function parseMonth(month) {
-  const [yearStr, monthStr] = (month || "").split("-");
-  const year = Number(yearStr);
-  const monthIndex = Number(monthStr) - 1;
-  if (!year || monthIndex < 0 || monthIndex > 11) {
-    return null;
-  }
-  const start = new Date(Date.UTC(year, monthIndex, 1));
-  const end = new Date(Date.UTC(year, monthIndex + 1, 0));
-  return { start, end };
-}
+import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
 
 export async function listFixedExpenses(req, res) {
-  const monthRange = parseMonth(req.query.month);
-  let result;
-  if (monthRange) {
-    result = await query(
-      "select * from fixed_expenses where user_id = $1 and start_date <= $2 and end_date >= $3 order by id desc",
-      [req.user.id, monthRange.end, monthRange.start]
-    );
-  } else {
-    result = await query(
-      "select * from fixed_expenses where user_id = $1 order by id desc",
-      [req.user.id]
-    );
+  const monthStartDay = await getMonthStartDay();
+  const monthRange = getPeriodRange(monthStartDay, req.query.month);
+  if (req.query.month && !monthRange) {
+    return res.status(400).json({ error: "invalid month format, use YYYY-MM" });
   }
+  let result;
+  result = await query(
+    "select * from fixed_expenses where user_id = $1 and start_date <= $2 and end_date >= $3 order by id desc",
+    [req.user.id, monthRange.end, monthRange.start]
+  );
 
   return res.json({ items: result.rows });
 }

@@ -23,6 +23,12 @@ create table if not exists user_permissions (
   created_at timestamptz not null default now()
 );
 
+create table if not exists app_settings (
+  id integer primary key,
+  month_start_day integer not null default 1,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists fixed_expenses (
   id bigserial primary key,
   user_id bigint not null references users(id) on delete cascade,

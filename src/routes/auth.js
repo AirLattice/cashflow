@@ -2,6 +2,7 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { query } from "../db.js";
+import { getMonthStartDay } from "../utils/period.js";
 
 function signAccessToken(userId) {
   return jwt.sign({}, process.env.JWT_ACCESS_SECRET, {
@@ -161,6 +162,7 @@ export async function me(req, res) {
   if (!user) {
     return res.status(404).json({ error: "user not found" });
   }
+  const monthStartDay = await getMonthStartDay();
   return res.json({
     id: user.id,
     username: user.username,
@@ -169,7 +171,8 @@ export async function me(req, res) {
       fixed_expenses: Boolean(user.can_view_fixed_expenses),
       incomes: Boolean(user.can_view_incomes),
       summary: Boolean(user.can_view_summary)
-    }
+    },
+    month_start_day: monthStartDay
   });
 }
 
