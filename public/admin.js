@@ -76,6 +76,9 @@ async function loadUsers() {
     setStatus("사용자 목록");
   } catch (err) {
     setStatus(err.message);
+    if (typeof window.initNav === "function") {
+      window.initNav({ isAuthenticated: false });
+    }
   }
 }
 
@@ -91,6 +94,9 @@ async function loadSettings() {
 async function init() {
   try {
     const me = await api("/auth/me");
+    if (typeof window.initNav === "function") {
+      window.initNav({ permissions: me.permissions || {}, role: me.role, isAuthenticated: true });
+    }
     if (me.role !== "admin") {
       setStatus("관리자만 접근할 수 있습니다.");
       return;

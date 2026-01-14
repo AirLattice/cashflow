@@ -55,6 +55,18 @@ body {
   justify-content: space-between;
 }
 
+.topbar-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.topbar-mobile {
+  position: relative;
+  display: none;
+}
+
 .requires-auth {
   display: none;
 }
@@ -413,6 +425,25 @@ button.ghost {
 }
 
 @media (max-width: 720px) {
+  .topbar-nav {
+    display: none;
+  }
+
+  .topbar-mobile {
+    display: block;
+  }
+
+  .topbar-mobile .menu-panel {
+    position: fixed;
+    top: 72px;
+    left: 6vw;
+    right: 6vw;
+    width: auto;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    z-index: 100;
+  }
+
   .card-row {
     grid-template-columns: 1fr;
     text-align: left;

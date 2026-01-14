@@ -14,43 +14,7 @@
   </head>
   <body>
     <div class="bg"></div>
-    <div class="topbar requires-auth">
-      <div class="topbar-inner">
-        <p id="auth-status" class="status">로그인 필요</p>
-        <div class="user-menu">
-          <button id="user-menu-btn" class="ghost hidden" type="button">아이디</button>
-          <div id="user-menu-panel" class="menu-panel hidden">
-            <form id="change-password-form" class="form">
-              <h3>비밀번호 변경</h3>
-              <label>
-                현재 비밀번호
-                <input type="password" name="current_password" required />
-              </label>
-              <label>
-                새 비밀번호
-                <input type="password" name="new_password" required />
-              </label>
-              <button type="submit">비밀번호 변경</button>
-              <p class="hint">비밀번호 정책: 영문/숫자/특수문자 포함 10자 이상</p>
-            </form>
-            <form id="delete-account-form" class="form">
-              <h3>회원 탈퇴</h3>
-              <label>
-                비밀번호 확인
-                <input type="password" name="password" required />
-              </label>
-              <button type="submit" class="ghost">회원 탈퇴</button>
-            </form>
-            <a id="fixed-manage-link" class="ghost-link hidden" href="/fixed-expenses.html"
-              >고정 지출 관리</a
-            >
-            <a id="admin-link" class="ghost-link hidden" href="/admin">관리자 페이지</a>
-            <button id="logout-btn" class="ghost" type="button">로그아웃</button>
-          </div>
-        </div>
-        <a id="admin-top-link" class="ghost-link hidden" href="/admin">관리자 페이지</a>
-      </div>
-    </div>
+    <div id="topbar-root" data-user-menu="true"></div>
     <header class="hero">
       <div class="requires-auth">
         <p class="eyebrow">가계 자금 흐름</p>
@@ -222,6 +186,7 @@
       </section>
     </main>
 
+    <script src="/nav.js"></script>
     <script src="/app.js"></script>
   </body>
 </html>

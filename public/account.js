@@ -144,5 +144,13 @@ api("/auth/me")
       sessionStorage.setItem("username", data.username);
     }
     setLoggedIn(true, data.username);
+    if (typeof window.initNav === "function") {
+      window.initNav({ permissions: data.permissions || {}, role: data.role, isAuthenticated: true });
+    }
   })
-  .catch(() => setLoggedIn(false));
+  .catch(() => {
+    setLoggedIn(false);
+    if (typeof window.initNav === "function") {
+      window.initNav({ isAuthenticated: false });
+    }
+  });

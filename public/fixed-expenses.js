@@ -201,6 +201,9 @@ async function loadItems() {
     setStatus("고정 지출 목록");
   } catch (err) {
     setStatus(err.message);
+    if (typeof window.initNav === "function") {
+      window.initNav({ isAuthenticated: false });
+    }
   }
 }
 
@@ -311,6 +314,9 @@ async function init() {
   try {
     const me = await api("/auth/me");
     const permissions = me.permissions || {};
+    if (typeof window.initNav === "function") {
+      window.initNav({ permissions, role: me.role, isAuthenticated: true });
+    }
     if (!(me.role === "admin" || permissions.fixed_expenses)) {
       setStatus("고정 지출 권한이 없습니다.");
       return;

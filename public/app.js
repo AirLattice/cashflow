@@ -8,7 +8,6 @@ const userMenuPanel = document.getElementById("user-menu-panel");
 const changePasswordForm = document.getElementById("change-password-form");
 const deleteAccountForm = document.getElementById("delete-account-form");
 const adminLink = document.getElementById("admin-link");
-const adminTopLink = document.getElementById("admin-top-link");
 const fixedManageLink = document.getElementById("fixed-manage-link");
 const summaryBtn = document.getElementById("summary-btn");
 const summaryMonth = document.getElementById("summary-month");
@@ -56,10 +55,8 @@ function setLoggedIn(isLoggedIn, username, role) {
     document.body.classList.add("is-authenticated");
     if (role === "admin") {
       adminLink.classList.remove("hidden");
-      adminTopLink.classList.remove("hidden");
     } else {
       adminLink.classList.add("hidden");
-      adminTopLink.classList.add("hidden");
     }
   } else {
     setStatus("로그인 필요");
@@ -76,8 +73,10 @@ function setLoggedIn(isLoggedIn, username, role) {
     }
     document.body.classList.remove("is-authenticated");
     adminLink.classList.add("hidden");
-    adminTopLink.classList.add("hidden");
     noAccessPanel.classList.add("hidden");
+    if (typeof window.initNav === "function") {
+      window.initNav({ isAuthenticated: false });
+    }
     summaryIncome.textContent = "-";
     summaryExpenses.textContent = "-";
     summaryBalance.textContent = "-";
@@ -97,6 +96,9 @@ function applyPermissions(permissions, role) {
   currentRole = role;
   if (fixedManageLink) {
     fixedManageLink.classList.toggle("hidden", !(isAdmin || allowed.fixed_expenses));
+  }
+  if (typeof window.initNav === "function") {
+    window.initNav({ permissions: allowed, role, isAuthenticated: true });
   }
   let anyVisible = false;
   permissionSections.forEach((section) => {
