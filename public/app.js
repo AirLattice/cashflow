@@ -44,10 +44,8 @@ function setLoggedIn(isLoggedIn, username, role) {
       mainLayout.style.display = "grid";
     }
     document.body.classList.add("is-authenticated");
-    if (role === "admin") {
-      adminLink.classList.remove("hidden");
-    } else {
-      adminLink.classList.add("hidden");
+    if (adminLink) {
+      adminLink.classList.toggle("hidden", role !== "admin");
     }
   } else {
     setStatus("로그인 필요");
@@ -63,7 +61,7 @@ function setLoggedIn(isLoggedIn, username, role) {
       mainLayout.style.display = "none";
     }
     document.body.classList.remove("is-authenticated");
-    adminLink.classList.add("hidden");
+    adminLink?.classList.add("hidden");
     noAccessPanel.classList.add("hidden");
     if (typeof window.initNav === "function") {
       window.initNav({ isAuthenticated: false });

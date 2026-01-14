@@ -47,8 +47,6 @@
               </label>
               <button type="submit" class="ghost">회원 탈퇴</button>
             </form>
-            <a id="fixed-manage-link" class="ghost-link hidden" href="/fixed-expenses.html">고정 지출 관리</a>
-            <a id="admin-link" class="ghost-link hidden" href="/admin">관리자 페이지</a>
             <button id="logout-btn" class="ghost" type="button">로그아웃</button>
           </div>
         </div>
