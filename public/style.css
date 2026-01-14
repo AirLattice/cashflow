@@ -1,13 +1,13 @@
 :root {
-  color-scheme: light;
-  --ink: #0c0f14;
-  --muted: #4a5668;
-  --bg: #f7f1e8;
-  --accent: #ff6b35;
-  --accent-2: #2a9d8f;
-  --card: rgba(255, 255, 255, 0.9);
-  --line: rgba(12, 15, 20, 0.12);
-  --shadow: 0 30px 80px rgba(12, 15, 20, 0.18);
+  color-scheme: dark;
+  --ink: #f5f6fb;
+  --muted: #a1a8b8;
+  --bg: #0f1117;
+  --accent: #48d1a0;
+  --accent-2: #f2a93b;
+  --card: #1c202a;
+  --line: rgba(245, 246, 251, 0.08);
+  --shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
 }
 
 * {
@@ -17,7 +17,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-family: "Manrope", "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--ink);
   padding-top: 58px;
@@ -27,9 +27,10 @@ body {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at top right, rgba(255, 107, 53, 0.2), transparent 45%),
-    radial-gradient(circle at 20% 30%, rgba(42, 157, 143, 0.2), transparent 45%),
-    linear-gradient(160deg, #f7f1e8, #ece2d3);
+    radial-gradient(circle at top left, rgba(72, 209, 160, 0.18), transparent 45%),
+    radial-gradient(circle at 70% 20%, rgba(242, 169, 59, 0.18), transparent 45%),
+    radial-gradient(circle at 20% 80%, rgba(92, 122, 255, 0.16), transparent 45%),
+    linear-gradient(160deg, #10131b, #0b0d12);
   z-index: -1;
 }
 
@@ -39,7 +40,7 @@ body {
   left: 0;
   right: 0;
   z-index: 10;
-  background: rgba(247, 241, 232, 0.85);
+  background: rgba(15, 17, 23, 0.9);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(10px);
 }
@@ -79,7 +80,7 @@ body {
   right: 0;
   top: 48px;
   width: min(360px, 90vw);
-  background: #fff;
+  background: #1c202a;
   border: 1px solid var(--line);
   border-radius: 18px;
   box-shadow: var(--shadow);
@@ -105,6 +106,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 12px;
+  font-family: "Space Mono", monospace;
   color: var(--muted);
   margin: 0 0 8px;
 }
@@ -126,13 +128,12 @@ h1 {
   border-radius: 24px;
   padding: 24px;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
 }
 
 .auth-tabs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  background: #fff;
+  background: #11151d;
   border-radius: 18px;
   border: 1px solid var(--line);
   overflow: hidden;
@@ -145,11 +146,12 @@ h1 {
   background: transparent;
   font-weight: 600;
   cursor: pointer;
+  color: var(--muted);
 }
 
 .tab.active {
   background: var(--accent);
-  color: #fff;
+  color: #0f1117;
 }
 
 .form {
@@ -180,7 +182,8 @@ select {
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: #11151d;
+  color: var(--ink);
 }
 
 button {
@@ -188,7 +191,7 @@ button {
   border-radius: 999px;
   border: none;
   background: var(--accent);
-  color: #fff;
+  color: #0f1117;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -196,7 +199,7 @@ button {
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(255, 107, 53, 0.2);
+  box-shadow: 0 10px 20px rgba(72, 209, 160, 0.25);
 }
 
 button.ghost {
@@ -265,7 +268,6 @@ button.ghost {
   border: 1px solid var(--line);
   padding: 24px;
   box-shadow: var(--shadow);
-  backdrop-filter: blur(12px);
 }
 
 .panel-head {
@@ -305,9 +307,10 @@ button.ghost {
 
 .bar-track {
   height: 18px;
-  background: rgba(12, 15, 20, 0.08);
+  background: #11151d;
   border-radius: 999px;
   overflow: hidden;
+  border: 1px solid var(--line);
 }
 
 .bar {
@@ -318,11 +321,11 @@ button.ghost {
 }
 
 .fill-income {
-  background: linear-gradient(90deg, #2a9d8f, #6ad7c6);
+  background: linear-gradient(90deg, #3de3ad, #48d1a0);
 }
 
 .fill-expense {
-  background: linear-gradient(90deg, #ff6b35, #f4a261);
+  background: linear-gradient(90deg, #f2a93b, #f2705c);
 }
 
 .bar-label {
@@ -339,7 +342,7 @@ button.ghost {
   padding: 16px;
   border-radius: 16px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: #161a22;
 }
 
 .summary-item span {
@@ -366,7 +369,7 @@ button.ghost {
   padding: 12px 16px;
   border-radius: 16px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: #151a23;
 }
 
 .admin-row {
