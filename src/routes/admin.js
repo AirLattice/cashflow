@@ -93,6 +93,20 @@ export async function listGroups(req, res) {
   return res.json({ groups: result.rows });
 }
 
+export async function createGroup(req, res) {
+  const name = String(req.body.name || "").trim();
+  if (!name) {
+    return res.status(400).json({ error: "group name is required" });
+  }
+
+  const result = await query(
+    "insert into groups (name) values ($1) on conflict (name) do update set name = excluded.name returning id, name",
+    [name]
+  );
+
+  return res.status(201).json({ group: result.rows[0] });
+}
+
 export async function getSettings(req, res) {
   const result = await query("select month_start_day from app_settings where id = 1");
   if (result.rows.length === 0) {

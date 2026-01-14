@@ -26,7 +26,8 @@ import {
   updateUserPermissions,
   getSettings,
   updateSettings,
-  listGroups
+  listGroups,
+  createGroup
 } from "./routes/admin.js";
 import { query } from "./db.js";
 
@@ -82,6 +83,7 @@ app.get("/summary", requireAuth, requirePermission("summary"), getSummary);
 app.get("/admin/users", requireAuth, requireAdmin, listUsers);
 app.put("/admin/users/:id/permissions", requireAuth, requireAdmin, updateUserPermissions);
 app.get("/admin/groups", requireAuth, requireAdmin, listGroups);
+app.post("/admin/groups", requireAuth, requireAdmin, createGroup);
 app.get("/admin/settings", requireAuth, requireAdmin, getSettings);
 app.put("/admin/settings", requireAuth, requireAdmin, updateSettings);
 

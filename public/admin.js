@@ -4,6 +4,8 @@ const settingsForm = document.getElementById("settings-form");
 const monthStartDayInput = document.getElementById("month-start-day");
 const adminPanel = document.getElementById("admin-panel");
 const deniedPanel = document.getElementById("admin-denied");
+const groupForm = document.getElementById("group-form");
+const groupNameInput = document.getElementById("group-name");
 let groupOptions = [];
 
 async function api(path, options = {}) {
@@ -187,6 +189,27 @@ settingsForm.addEventListener("submit", async (event) => {
       body: JSON.stringify({ month_start_day: value })
     });
     setStatus("월 기준이 저장되었습니다.");
+  } catch (err) {
+    setStatus(err.message);
+  }
+});
+
+groupForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const name = groupNameInput.value.trim();
+  if (!name) {
+    setStatus("그룹 이름을 입력해주세요.");
+    return;
+  }
+  try {
+    await api("/admin/groups", {
+      method: "POST",
+      body: JSON.stringify({ name })
+    });
+    setStatus("그룹이 추가되었습니다.");
+    groupNameInput.value = "";
+    await loadGroups();
+    await loadUsers();
   } catch (err) {
     setStatus(err.message);
   }
