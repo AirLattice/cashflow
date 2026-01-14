@@ -20,6 +20,11 @@ import {
 import { listIncomes, createIncome, updateIncome, deleteIncome } from "./routes/incomes.js";
 import { getSummary } from "./routes/summary.js";
 import { requireAuth } from "./middleware/auth.js";
+import {
+  getWebSmsApiKey,
+  isWebSmsFallbackKey,
+  requireWebSmsApiKey
+} from "./middleware/websmsAuth.js";
 import { requireAdmin, requirePermission } from "./middleware/permissions.js";
 import {
   listUsers,
@@ -29,6 +34,7 @@ import {
   listGroups,
   createGroup
 } from "./routes/admin.js";
+import { receiveWebSms } from "./routes/websms.js";
 import { query } from "./db.js";
 
 const app = express();
@@ -87,6 +93,8 @@ app.post("/admin/groups", requireAuth, requireAdmin, createGroup);
 app.get("/admin/settings", requireAuth, requireAdmin, getSettings);
 app.put("/admin/settings", requireAuth, requireAdmin, updateSettings);
 
+app.post("/websms", requireWebSmsApiKey, receiveWebSms);
+
 async function ensureAdminSeed(attempt = 0) {
   try {
     const result = await query("select id from users where username = 'admin' limit 1");
@@ -124,5 +132,8 @@ async function ensureAdminSeed(attempt = 0) {
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
   console.log(`cashflow api listening on ${port}`);
+  if (isWebSmsFallbackKey()) {
+    console.log(`WEBSMS_API_KEY not set, using temporary key: ${getWebSmsApiKey()}`);
+  }
   ensureAdminSeed();
 });

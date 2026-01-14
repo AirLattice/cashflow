@@ -123,3 +123,19 @@ Response:
   "balance_cents": 2500000
 }
 ```
+
+## WebSMS
+
+- POST /websms
+- Header: `x-api-key: <WEBSMS_API_KEY>`
+- Body:
+
+```json
+{
+  "text": "카드 승인 12,300원 ..."
+}
+```
+
+Notes:
+- `WEBSMS_API_KEY` env var로 인증합니다.
+- 설정이 없으면 서버가 임시 키를 로그로 출력합니다.
