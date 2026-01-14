@@ -38,6 +38,15 @@ let refreshInFlight = null;
 let currentPermissions = {};
 let currentRole = null;
 
+function parseMoneyValue(value) {
+  if (window.FormUtils && typeof window.FormUtils.parseMoney === "function") {
+    return window.FormUtils.parseMoney(value);
+  }
+  const cleaned = String(value || "").replace(/,/g, "");
+  const parsed = Number(cleaned);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 function setStatus(message) {
   authStatus.textContent = message;
 }
@@ -396,8 +405,8 @@ async function loadFixed() {
 async function handleFixedSubmit(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(fixedForm));
-  data.total_amount_cents = Number(data.total_amount_cents || 0);
-  data.per_month_cents = Number(data.per_month_cents || 0);
+  data.total_amount_cents = parseMoneyValue(data.total_amount_cents);
+  data.per_month_cents = parseMoneyValue(data.per_month_cents);
   data.installments_count = data.installments_count ? Number(data.installments_count) : null;
   try {
     await api("/fixed-expenses", {
@@ -434,7 +443,7 @@ async function loadIncome() {
 async function handleIncomeSubmit(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(incomeForm));
-  data.amount_cents = Number(data.amount_cents || 0);
+  data.amount_cents = parseMoneyValue(data.amount_cents);
   try {
     await api("/incomes", {
       method: "POST",

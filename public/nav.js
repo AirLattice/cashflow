@@ -29,7 +29,8 @@
           <div class="user-menu">
             <button id="user-menu-btn" class="ghost hidden" type="button">아이디</button>
             <div id="user-menu-panel" class="menu-panel hidden">
-              <form id="change-password-form" class="form">
+              <button id="change-password-toggle" class="ghost" type="button">비밀번호 변경</button>
+              <form id="change-password-form" class="form hidden">
                 <h3>비밀번호 변경</h3>
                 <label>
                   현재 비밀번호
@@ -42,7 +43,8 @@
                 <button type="submit">비밀번호 변경</button>
                 <p class="hint">비밀번호 정책: 영문/숫자/특수문자 포함 10자 이상</p>
               </form>
-              <form id="delete-account-form" class="form">
+              <button id="delete-account-toggle" class="ghost" type="button">회원 탈퇴</button>
+              <form id="delete-account-form" class="form hidden">
                 <h3>회원 탈퇴</h3>
                 <label>
                   비밀번호 확인
@@ -64,6 +66,10 @@
 
   const navMenuBtn = document.getElementById("nav-menu-btn");
   const navMenuPanel = document.getElementById("nav-menu-panel");
+  const changePasswordToggle = document.getElementById("change-password-toggle");
+  const deleteAccountToggle = document.getElementById("delete-account-toggle");
+  const changePasswordForm = document.getElementById("change-password-form");
+  const deleteAccountForm = document.getElementById("delete-account-form");
 
   function bindNavMenu() {
     if (!navMenuBtn || !navMenuPanel) {
@@ -84,6 +90,21 @@
           navMenuPanel.classList.add("hidden");
         }
       }
+    });
+  }
+
+  function bindUserMenuToggles() {
+    if (!changePasswordToggle || !deleteAccountToggle) {
+      return;
+    }
+
+    changePasswordToggle.addEventListener("click", () => {
+      changePasswordForm?.classList.toggle("hidden");
+      deleteAccountForm?.classList.add("hidden");
+    });
+    deleteAccountToggle.addEventListener("click", () => {
+      deleteAccountForm?.classList.toggle("hidden");
+      changePasswordForm?.classList.add("hidden");
     });
   }
 
@@ -116,5 +137,6 @@
   window.initNav = ({ permissions = {}, role = null, isAuthenticated = false } = {}) => {
     applyPermissions(permissions, role, isAuthenticated);
     bindNavMenu();
+    bindUserMenuToggles();
   };
 })();

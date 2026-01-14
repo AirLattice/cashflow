@@ -176,6 +176,20 @@ label {
   color: var(--muted);
 }
 
+.input-highlight {
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(61, 112, 180, 0.55);
+  background: #0f1f36;
+  color: #c6d6f2;
+}
+
+.input-highlight input {
+  background: #0b172a;
+  border-color: rgba(61, 112, 180, 0.55);
+  color: var(--ink);
+}
+
 input,
 select,
 button {
@@ -407,6 +421,19 @@ button.ghost {
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.list-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.list-controls .inline-field {
+  grid-template-columns: auto 1fr;
+  align-items: center;
 }
 
 .admin-controls {

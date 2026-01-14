@@ -125,11 +125,25 @@
           </label>
           <label>
             총액 (원)
-            <input type="number" name="total_amount_cents" min="0" required />
+            <input
+              type="text"
+              name="total_amount_cents"
+              inputmode="numeric"
+              autocomplete="off"
+              data-money="true"
+              required
+            />
           </label>
           <label>
             월별 금액 (원)
-            <input type="number" name="per_month_cents" min="0" required />
+            <input
+              type="text"
+              name="per_month_cents"
+              inputmode="numeric"
+              autocomplete="off"
+              data-money="true"
+              required
+            />
           </label>
           <label>
             시작일
@@ -170,7 +184,14 @@
           </label>
           <label>
             금액 (원)
-            <input type="number" name="amount_cents" min="0" required />
+            <input
+              type="text"
+              name="amount_cents"
+              inputmode="numeric"
+              autocomplete="off"
+              data-money="true"
+              required
+            />
           </label>
           <label>
             수입일
@@ -187,6 +208,7 @@
     </main>
 
     <script src="/nav.js"></script>
+    <script src="/form-utils.js"></script>
     <script src="/app.js"></script>
   </body>
 </html>

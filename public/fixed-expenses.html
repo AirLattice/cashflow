@@ -27,53 +27,86 @@
 
       <section class="panel">
         <p id="fixed-status" class="hint">로딩 중...</p>
-        <form id="fixed-create-form" class="form grid">
-          <label>
+        <div class="list-controls">
+          <button id="fixed-add-toggle" type="button">추가</button>
+          <label class="inline-field">
+            <input type="checkbox" id="fixed-select-all" />
+            <span>모두선택</span>
+          </label>
+          <button id="fixed-clear-selection" class="ghost" type="button">모두해제</button>
+          <button id="fixed-delete-selected" class="ghost" type="button">삭제</button>
+        </div>
+        <form id="fixed-create-form" class="form grid hidden">
+          <label class="input-highlight">
             항목명
             <input type="text" name="name" required />
           </label>
-          <label>
-            고정지출 종류
-            <select name="payment_type" required>
-              <option value="installment">할부</option>
-              <option value="loan">대출</option>
-            </select>
+          <label class="input-highlight">
+            구매 금액 (원)
+            <input
+              type="text"
+              name="total_amount_cents"
+              inputmode="numeric"
+              autocomplete="off"
+              data-money="true"
+              required
+            />
           </label>
-          <label>
+          <label class="input-highlight">
             할부 개월수
             <input type="number" name="installments_count" min="1" required />
           </label>
-          <label>
+          <label class="input-highlight">
             이자율 (%)
             <input type="number" name="interest_rate" min="0" step="0.01" required />
           </label>
-          <label>
-            결제 금액 (원)
-            <input type="number" name="per_month_cents" min="0" required />
-          </label>
-          <label>
-            시작일
+          <label class="input-highlight">
+            첫 결제일
             <input type="date" name="start_date" required />
           </label>
           <label>
-            마지막 지출일
+            월 결제 금액 (원)
+            <input
+              type="text"
+              name="per_month_cents"
+              inputmode="numeric"
+              autocomplete="off"
+              data-money="true"
+            />
+          </label>
+          <label>
+            마지막 결제일
             <input type="date" name="end_date" required />
           </label>
           <label>
-            전체 금액 (원)
-            <input type="number" name="total_amount_cents" min="0" required />
-          </label>
-          <label>
             전체 이자 금액 (원)
-            <input type="number" name="total_interest_cents" min="0" />
+            <input
+              type="text"
+              name="total_interest_cents"
+              inputmode="numeric"
+              autocomplete="off"
+              data-money="true"
+            />
           </label>
           <label>
-            전체 이자+원금 (원)
-            <input type="number" name="total_with_interest_cents" min="0" />
+            전체 금액 (원)
+            <input
+              type="text"
+              name="total_with_interest_cents"
+              inputmode="numeric"
+              autocomplete="off"
+              data-money="true"
+            />
           </label>
           <label>
             남은 금액 (원)
-            <input type="number" name="remaining_cents" min="0" />
+            <input
+              type="text"
+              name="remaining_cents"
+              inputmode="numeric"
+              autocomplete="off"
+              data-money="true"
+            />
           </label>
           <button type="submit">고정 지출 추가</button>
         </form>
@@ -82,6 +115,7 @@
     </main>
 
     <script src="/nav.js"></script>
+    <script src="/form-utils.js"></script>
     <script src="/fixed-expenses.js"></script>
   </body>
 </html>
