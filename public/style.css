@@ -411,6 +411,32 @@ button.ghost {
   grid-template-columns: 1fr 1.3fr 1fr;
 }
 
+.admin-identity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-identity small {
+  color: var(--muted);
+}
+
+.admin-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.admin-group span {
+  color: var(--muted);
+}
+
+.admin-group select {
+  min-width: 140px;
+}
+
 .fixed-row {
   grid-template-columns: auto 1.4fr 1fr 1fr;
 }

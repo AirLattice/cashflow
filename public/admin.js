@@ -45,7 +45,10 @@ function renderUsers(users) {
     return;
   }
 
-  const groupOptionsMarkup = groupOptions
+  const groupOptionsMarkup = (groupOptions.length
+    ? groupOptions
+    : [{ id: "", name: "그룹 없음" }]
+  )
     .map((group) => `<option value="${group.id}">${group.name}</option>`)
     .join("");
 
@@ -55,7 +58,15 @@ function renderUsers(users) {
       return `
       <div class="card-row admin-row" data-user-id="${user.id}">
         <div>
-          <strong>${user.username}</strong>
+          <div class="admin-identity">
+            <label class="admin-group">
+              <select data-group-id>
+                ${groupOptionsMarkup}
+              </select>
+            </label>
+            <strong>${user.username}</strong>
+            <small>#${user.id}</small>
+          </div>
           <small>역할: ${user.role}</small>
         </div>
         <div class="admin-controls">
@@ -68,12 +79,6 @@ function renderUsers(users) {
           <label><input type="checkbox" data-perm="summary" ${
             perms.summary ? "checked" : ""
           } /> 요약</label>
-          <label>
-            데이터 그룹
-            <select data-group-id>
-              ${groupOptionsMarkup}
-            </select>
-          </label>
         </div>
         <div class="admin-controls">
           <select data-role>
@@ -175,6 +180,34 @@ tableEl.addEventListener("click", async (event) => {
       body: JSON.stringify({ role, group_id: groupId, ...perms })
     });
     setStatus("저장 완료");
+  } catch (err) {
+    setStatus(err.message);
+  }
+});
+
+tableEl.addEventListener("change", async (event) => {
+  const select = event.target.closest("select[data-group-id]");
+  if (!select) {
+    return;
+  }
+  const row = select.closest(".admin-row");
+  if (!row) {
+    return;
+  }
+  const userId = row.dataset.userId;
+  const perms = {
+    can_view_fixed_expenses: row.querySelector("input[data-perm='fixed_expenses']").checked,
+    can_view_incomes: row.querySelector("input[data-perm='incomes']").checked,
+    can_view_summary: row.querySelector("input[data-perm='summary']").checked
+  };
+  const role = row.querySelector("select[data-role]").value;
+  const groupId = Number(select.value);
+  try {
+    await api(`/admin/users/${userId}/permissions`, {
+      method: "PUT",
+      body: JSON.stringify({ role, group_id: groupId, ...perms })
+    });
+    setStatus("데이터 그룹이 변경되었습니다.");
   } catch (err) {
     setStatus(err.message);
   }
