@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>관리자 권한 관리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <p class="status">관리자 모드</p>
+        <div class="auth-actions">
+          <a class="ghost-link" href="/">대시보드로</a>
+        </div>
+      </div>
+    </div>
+
+    <main class="page-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">권한 관리</p>
+          <h1>사용자 권한</h1>
+          <p class="subhead">사용자별로 고정지출/수입/요약 열람 권한을 지정합니다.</p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <p id="admin-status" class="status">로딩 중...</p>
+        <div id="admin-table" class="list"></div>
+      </section>
+    </main>
+
+    <script src="/admin.js"></script>
+  </body>
+</html>

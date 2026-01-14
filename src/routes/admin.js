@@ -1,0 +1,66 @@
+import { query } from "../db.js";
+
+export async function listUsers(req, res) {
+  const result = await query(
+    "select u.id, u.username, u.role, p.can_view_fixed_expenses, p.can_view_incomes, p.can_view_summary from users u left join user_permissions p on u.id = p.user_id order by u.id asc"
+  );
+
+  const users = result.rows.map((row) => ({
+    id: row.id,
+    username: row.username,
+    role: row.role,
+    permissions: {
+      fixed_expenses: Boolean(row.can_view_fixed_expenses),
+      incomes: Boolean(row.can_view_incomes),
+      summary: Boolean(row.can_view_summary)
+    }
+  }));
+
+  return res.json({ users });
+}
+
+export async function updateUserPermissions(req, res) {
+  const userId = Number(req.params.id);
+  if (!userId) {
+    return res.status(400).json({ error: "invalid user id" });
+  }
+
+  const { role, can_view_fixed_expenses, can_view_incomes, can_view_summary } = req.body;
+
+  if (
+    typeof can_view_fixed_expenses !== "boolean" ||
+    typeof can_view_incomes !== "boolean" ||
+    typeof can_view_summary !== "boolean"
+  ) {
+    return res.status(400).json({ error: "permissions must be boolean" });
+  }
+
+  if (role && role !== "admin" && role !== "user") {
+    return res.status(400).json({ error: "invalid role" });
+  }
+
+  const userResult = await query("select id, role from users where id = $1", [userId]);
+  const targetUser = userResult.rows[0];
+  if (!targetUser) {
+    return res.status(404).json({ error: "user not found" });
+  }
+
+  if (role && role !== "admin" && userId === req.user.id) {
+    return res.status(400).json({ error: "cannot demote self" });
+  }
+
+  await query("insert into user_permissions (user_id) values ($1) on conflict do nothing", [
+    userId
+  ]);
+
+  await query(
+    "update user_permissions set can_view_fixed_expenses = $1, can_view_incomes = $2, can_view_summary = $3 where user_id = $4",
+    [can_view_fixed_expenses, can_view_incomes, can_view_summary, userId]
+  );
+
+  if (role) {
+    await query("update users set role = $1 where id = $2", [role, userId]);
+  }
+
+  return res.json({ ok: true });
+}

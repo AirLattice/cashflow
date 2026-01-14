@@ -7,11 +7,19 @@ const userMenuBtn = document.getElementById("user-menu-btn");
 const userMenuPanel = document.getElementById("user-menu-panel");
 const changePasswordForm = document.getElementById("change-password-form");
 const deleteAccountForm = document.getElementById("delete-account-form");
+const adminLink = document.getElementById("admin-link");
+const adminTopLink = document.getElementById("admin-top-link");
 const summaryBtn = document.getElementById("summary-btn");
 const summaryMonth = document.getElementById("summary-month");
 const summaryIncome = document.getElementById("summary-income");
 const summaryExpenses = document.getElementById("summary-expenses");
 const summaryBalance = document.getElementById("summary-balance");
+const chartMonth = document.getElementById("chart-month");
+const chartBtn = document.getElementById("chart-btn");
+const incomeBar = document.getElementById("income-bar");
+const expenseBar = document.getElementById("expense-bar");
+const incomeBarValue = document.getElementById("income-bar-value");
+const expenseBarValue = document.getElementById("expense-bar-value");
 const fixedForm = document.getElementById("fixed-form");
 const fixedList = document.getElementById("fixed-list");
 const fixedMonth = document.getElementById("fixed-month");
@@ -21,6 +29,8 @@ const incomeList = document.getElementById("income-list");
 const incomeMonth = document.getElementById("income-month");
 const incomeLoad = document.getElementById("income-load");
 const tabs = document.querySelectorAll(".tab");
+const permissionSections = document.querySelectorAll(".permission-section");
+const noAccessPanel = document.getElementById("no-access");
 
 const formatter = new Intl.NumberFormat("ko-KR");
 let refreshInFlight = null;
@@ -29,18 +39,44 @@ function setStatus(message) {
   authStatus.textContent = message;
 }
 
-function setLoggedIn(isLoggedIn, username) {
+function setLoggedIn(isLoggedIn, username, role) {
   if (isLoggedIn) {
     setStatus("로그인됨");
     authPanel.classList.add("hidden");
     userMenuBtn.textContent = username || "내 계정";
     userMenuBtn.classList.remove("hidden");
+    document.body.classList.add("is-authenticated");
+    if (role === "admin") {
+      adminLink.classList.remove("hidden");
+      adminTopLink.classList.remove("hidden");
+    } else {
+      adminLink.classList.add("hidden");
+      adminTopLink.classList.add("hidden");
+    }
   } else {
     setStatus("로그인 필요");
     authPanel.classList.remove("hidden");
     userMenuBtn.classList.add("hidden");
     userMenuPanel.classList.add("hidden");
+    document.body.classList.remove("is-authenticated");
+    adminLink.classList.add("hidden");
+    adminTopLink.classList.add("hidden");
   }
+}
+
+function applyPermissions(permissions, role) {
+  const allowed = permissions || {};
+  const isAdmin = role === "admin";
+  let anyVisible = false;
+  permissionSections.forEach((section) => {
+    const key = section.dataset.permission;
+    const isAllowed = isAdmin || Boolean(allowed[key]);
+    section.classList.toggle("hidden", !isAllowed);
+    if (isAllowed) {
+      anyVisible = true;
+    }
+  });
+  noAccessPanel.classList.toggle("hidden", anyVisible);
 }
 
 function setTab(name) {
@@ -105,8 +141,8 @@ async function handleLogin(event) {
       method: "POST",
       body: JSON.stringify(data)
     });
-    setLoggedIn(true, data.username);
     sessionStorage.setItem("username", data.username);
+    await loadProfile();
   } catch (err) {
     setStatus(err.message);
   }
@@ -152,7 +188,7 @@ async function handleChangePassword(event) {
         body: JSON.stringify({ username, password: data.new_password })
       });
       setStatus("비밀번호가 변경되었습니다.");
-      setLoggedIn(true, username);
+      await loadProfile();
     } else {
       setStatus("비밀번호가 변경되었습니다. 다시 로그인해주세요.");
       setLoggedIn(false);
@@ -191,9 +227,12 @@ async function loadProfile() {
     if (data.username) {
       sessionStorage.setItem("username", data.username);
     }
-    setLoggedIn(true, data.username);
+    setLoggedIn(true, data.username, data.role);
+    applyPermissions(data.permissions || {}, data.role);
   } catch (err) {
     setLoggedIn(false);
+    applyPermissions({});
+    noAccessPanel.classList.add("hidden");
   }
 }
 
@@ -212,6 +251,24 @@ async function loadSummary() {
     summaryIncome.textContent = formatter.format(data.total_income_cents);
     summaryExpenses.textContent = formatter.format(data.total_fixed_expense_cents);
     summaryBalance.textContent = formatter.format(data.balance_cents);
+  } catch (err) {
+    setStatus(err.message);
+  }
+}
+
+async function loadChart() {
+  const month = chartMonth.value || monthValue();
+  chartMonth.value = month;
+  try {
+    const data = await api(`/summary?month=${month}`);
+    const income = Number(data.total_income_cents || 0);
+    const expense = Number(data.total_fixed_expense_cents || 0);
+    const maxValue = Math.max(income, expense, 1);
+
+    incomeBar.style.width = `${(income / maxValue) * 100}%`;
+    expenseBar.style.width = `${(expense / maxValue) * 100}%`;
+    incomeBarValue.textContent = formatter.format(income);
+    expenseBarValue.textContent = formatter.format(expense);
   } catch (err) {
     setStatus(err.message);
   }
@@ -358,6 +415,7 @@ async function handleListClick(event) {
 }
 
 summaryBtn.addEventListener("click", loadSummary);
+chartBtn.addEventListener("click", loadChart);
 fixedLoad.addEventListener("click", loadFixed);
 incomeLoad.addEventListener("click", loadIncome);
 loginForm.addEventListener("submit", handleLogin);
@@ -375,6 +433,7 @@ tabs.forEach((tab) => {
 });
 
 summaryMonth.value = monthValue();
+chartMonth.value = monthValue();
 fixedMonth.value = monthValue();
 incomeMonth.value = monthValue();
 

@@ -54,6 +54,22 @@ body {
   justify-content: space-between;
 }
 
+.requires-auth {
+  display: none;
+}
+
+.is-authenticated .requires-auth {
+  display: block;
+}
+
+.requires-auth-grid {
+  display: none;
+}
+
+.is-authenticated .requires-auth-grid {
+  display: grid;
+}
+
 .user-menu {
   position: relative;
 }
@@ -277,6 +293,48 @@ button.ghost {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.chart {
+  display: grid;
+  gap: 16px;
+}
+
+.bar-group {
+  display: grid;
+  gap: 10px;
+}
+
+.bar-track {
+  height: 18px;
+  background: rgba(12, 15, 20, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.fill-income {
+  background: linear-gradient(90deg, #2a9d8f, #6ad7c6);
+}
+
+.fill-expense {
+  background: linear-gradient(90deg, #ff6b35, #f4a261);
+}
+
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+}
+
+.bar-label strong {
+  color: var(--ink);
+}
+
 .summary-item {
   padding: 16px;
   border-radius: 16px;
@@ -309,6 +367,17 @@ button.ghost {
   border-radius: 16px;
   border: 1px solid var(--line);
   background: #fff;
+}
+
+.admin-row {
+  grid-template-columns: 1fr 1.3fr 1fr;
+}
+
+.admin-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .card-row small {

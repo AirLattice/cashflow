@@ -52,6 +52,10 @@ export async function register(req, res) {
     return res.status(400).json({ error: "username and password required" });
   }
 
+  if (username.toLowerCase() === "admin") {
+    return res.status(400).json({ error: "username is reserved" });
+  }
+
   if (!isStrongPassword(password)) {
     return res.status(400).json({
       error: "password must be at least 10 chars and include letters, numbers, and symbols"
@@ -61,9 +65,12 @@ export async function register(req, res) {
   const passwordHash = await bcrypt.hash(password, 12);
   try {
     const result = await query(
-      "insert into users (username, password_hash) values ($1, $2) returning id",
+      "insert into users (username, password_hash, role) values ($1, $2, 'user') returning id",
       [username, passwordHash]
     );
+    await query("insert into user_permissions (user_id) values ($1)", [
+      result.rows[0].id
+    ]);
     return res.status(201).json({ id: result.rows[0].id, username });
   } catch (err) {
     if (err.code === "23505") {
@@ -146,14 +153,24 @@ export async function logout(req, res) {
 }
 
 export async function me(req, res) {
-  const result = await query("select id, username from users where id = $1", [
-    req.user.id
-  ]);
+  const result = await query(
+    "select u.id, u.username, u.role, p.can_view_fixed_expenses, p.can_view_incomes, p.can_view_summary from users u left join user_permissions p on u.id = p.user_id where u.id = $1",
+    [req.user.id]
+  );
   const user = result.rows[0];
   if (!user) {
     return res.status(404).json({ error: "user not found" });
   }
-  return res.json({ id: user.id, username: user.username });
+  return res.json({
+    id: user.id,
+    username: user.username,
+    role: user.role,
+    permissions: {
+      fixed_expenses: Boolean(user.can_view_fixed_expenses),
+      incomes: Boolean(user.can_view_incomes),
+      summary: Boolean(user.can_view_summary)
+    }
+  });
 }
 
 export async function changePassword(req, res) {

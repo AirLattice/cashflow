@@ -12,6 +12,7 @@ docker compose up --build
 
 API and web UI will be available at http://localhost:8081.
 Account management page: http://localhost:8081/account.html
+Admin page: http://localhost:8081/admin.html
 
 ## Auth
 
@@ -23,6 +24,10 @@ Account management page: http://localhost:8081/account.html
 - POST /auth/change-password { "current_password": "...", "new_password": "..." }
 - POST /auth/delete-account { "password": "..." }
 
+Admin:
+- GET /admin/users
+- PUT /admin/users/:id/permissions { "role": "admin|user", "can_view_fixed_expenses": true, "can_view_incomes": true, "can_view_summary": true }
+
 Cookies:
 - access_token (1 hour)
 - refresh_token (7 days)
@@ -31,12 +36,27 @@ Password policy:
 - At least 10 characters
 - Must include letters, numbers, and symbols
 
+Admin account:
+- username: admin
+- password: admin
+- First login should change the password.
+
+Permissions:
+- New users start with no access to fixed expenses, incomes, or summary.
+- Admin must grant permissions via the admin page.
+
 ## Migration (existing DB)
 
 If you created accounts before switching to `username`, run:
 
 ```bash
 cat migrations/001_users_username.sql | docker compose exec -T db psql -U postgres -d cashflow
+```
+
+Permissions/roles migration:
+
+```bash
+cat migrations/002_roles_permissions.sql | docker compose exec -T db psql -U postgres -d cashflow
 ```
 
 ## Fixed expenses

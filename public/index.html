@@ -14,7 +14,7 @@
   </head>
   <body>
     <div class="bg"></div>
-    <div class="topbar">
+    <div class="topbar requires-auth">
       <div class="topbar-inner">
         <p id="auth-status" class="status">로그인 필요</p>
         <div class="user-menu">
@@ -41,13 +41,15 @@
               </label>
               <button type="submit" class="ghost">회원 탈퇴</button>
             </form>
+            <a id="admin-link" class="ghost-link hidden" href="/admin">관리자 페이지</a>
             <button id="logout-btn" class="ghost" type="button">로그아웃</button>
           </div>
         </div>
+        <a id="admin-top-link" class="ghost-link hidden" href="/admin">관리자 페이지</a>
       </div>
     </div>
     <header class="hero">
-      <div>
+      <div class="requires-auth">
         <p class="eyebrow">가계 자금 흐름</p>
         <h1>월별 자금 흐름</h1>
         <p class="subhead">
@@ -86,8 +88,37 @@
       </div>
     </header>
 
-    <main class="layout">
-      <section class="panel">
+    <main class="layout requires-auth-grid">
+      <section class="panel permission-section" data-permission="summary">
+        <div class="panel-head">
+          <h2>월 수입/지출 비교</h2>
+          <div class="inline">
+            <input type="month" id="chart-month" />
+            <button id="chart-btn" type="button">불러오기</button>
+          </div>
+        </div>
+        <div class="chart">
+          <div class="bar-group">
+            <div class="bar-track">
+              <div id="income-bar" class="bar fill-income"></div>
+            </div>
+            <div class="bar-label">
+              <span>총 수입</span>
+              <strong id="income-bar-value">-</strong>
+            </div>
+          </div>
+          <div class="bar-group">
+            <div class="bar-track">
+              <div id="expense-bar" class="bar fill-expense"></div>
+            </div>
+            <div class="bar-label">
+              <span>총 지출</span>
+              <strong id="expense-bar-value">-</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="panel permission-section" data-permission="summary">
         <div class="panel-head">
           <h2>월 요약</h2>
           <div class="inline">
@@ -111,7 +142,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel permission-section" data-permission="fixed_expenses">
         <div class="panel-head">
           <h2>고정 지출</h2>
           <div class="inline">
@@ -156,7 +187,7 @@
         <div id="fixed-list" class="list"></div>
       </section>
 
-      <section class="panel">
+      <section class="panel permission-section" data-permission="incomes">
         <div class="panel-head">
           <h2>수입</h2>
           <div class="inline">
@@ -180,6 +211,10 @@
           <button type="submit">수입 추가</button>
         </form>
         <div id="income-list" class="list"></div>
+      </section>
+      <section id="no-access" class="panel hidden">
+        <h2>권한 필요</h2>
+        <p class="subhead">관리자가 권한을 부여해야 내용을 볼 수 있습니다.</p>
       </section>
     </main>
 
