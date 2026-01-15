@@ -13,6 +13,8 @@ services:
 
   api:
     build: .
+    env_file:
+      - .env
     environment:
       PORT: 8080
       DATABASE_URL: postgres://postgres:postgres@db:5432/cashflow
@@ -22,6 +24,15 @@ services:
       - "8081:8080"
     depends_on:
       - db
+    networks:
+      default: {}
+      nginx-net:
+        aliases:
+          - cashflow-api
 
 volumes:
   db_data:
+
+networks:
+  nginx-net:
+    external: true
