@@ -324,11 +324,11 @@ function renderFixedSummary(items) {
     const remaining = formatter.format(item.remaining_cents || 0);
     return `
       <tr>
-        <td>${item.name}</td>
-        <td>${perMonth}원</td>
-        <td>${formatDate(item.start_date)}</td>
-        <td>${formatDate(item.end_date)}</td>
-        <td>${remaining}원</td>
+        <td data-label="항목">${item.name}</td>
+        <td data-label="월 금액">${perMonth}원</td>
+        <td data-label="시작일">${formatDate(item.start_date)}</td>
+        <td data-label="마지막 결제일">${formatDate(item.end_date)}</td>
+        <td data-label="남은 금액">${remaining}원</td>
       </tr>
     `;
   });

@@ -579,6 +579,46 @@ button.ghost {
     z-index: 100;
   }
 
+  .table-wrap {
+    overflow: visible;
+  }
+
+  .data-table {
+    min-width: 0;
+  }
+
+  .data-table thead {
+    display: none;
+  }
+
+  .data-table tbody,
+  .data-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table tr {
+    padding: 12px;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    margin-bottom: 12px;
+  }
+
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border: none;
+  }
+
+  .data-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-weight: 600;
+  }
+
   .card-row {
     grid-template-columns: 1fr;
     text-align: left;
