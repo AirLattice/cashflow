@@ -1,8 +1,9 @@
 import { query } from "../db.js";
+import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
 
 export async function listUsers(req, res) {
   const result = await query(
-    "select u.id, u.username, u.role, u.active_group_id, g.name as group_name, p.can_view_fixed_expenses, p.can_view_incomes, p.can_view_summary from users u left join groups g on u.active_group_id = g.id left join user_permissions p on u.id = p.user_id order by u.id asc"
+    "select u.id, u.username, u.role, u.active_group_id, g.name as group_name, p.can_view_assets, p.can_view_transactions, p.can_view_summary from users u left join groups g on u.active_group_id = g.id left join user_permissions p on u.id = p.user_id order by u.id asc"
   );
 
   const users = result.rows.map((row) => ({
@@ -12,8 +13,8 @@ export async function listUsers(req, res) {
     group_id: row.active_group_id,
     group_name: row.group_name,
     permissions: {
-      fixed_expenses: Boolean(row.can_view_fixed_expenses),
-      incomes: Boolean(row.can_view_incomes),
+      assets: Boolean(row.can_view_assets),
+      transactions: Boolean(row.can_view_transactions),
       summary: Boolean(row.can_view_summary)
     }
   }));
@@ -27,12 +28,12 @@ export async function updateUserPermissions(req, res) {
     return res.status(400).json({ error: "invalid user id" });
   }
 
-  const { role, can_view_fixed_expenses, can_view_incomes, can_view_summary, group_id } =
+  const { role, can_view_assets, can_view_transactions, can_view_summary, group_id } =
     req.body;
 
   if (
-    typeof can_view_fixed_expenses !== "boolean" ||
-    typeof can_view_incomes !== "boolean" ||
+    typeof can_view_assets !== "boolean" ||
+    typeof can_view_transactions !== "boolean" ||
     typeof can_view_summary !== "boolean"
   ) {
     return res.status(400).json({ error: "permissions must be boolean" });
@@ -70,8 +71,8 @@ export async function updateUserPermissions(req, res) {
   ]);
 
   await query(
-    "update user_permissions set can_view_fixed_expenses = $1, can_view_incomes = $2, can_view_summary = $3 where user_id = $4",
-    [can_view_fixed_expenses, can_view_incomes, can_view_summary, userId]
+    "update user_permissions set can_view_assets = $1, can_view_transactions = $2, can_view_summary = $3 where user_id = $4",
+    [can_view_assets, can_view_transactions, can_view_summary, userId]
   );
 
   if (role) {
@@ -130,4 +131,69 @@ export async function updateSettings(req, res) {
     [value]
   );
   return res.json({ ok: true, month_start_day: value });
+}
+
+export async function getGroupSummary(req, res) {
+  const userId = Number(req.query.user_id);
+  const groupId = Number(req.query.group_id);
+  if (!userId || !groupId) {
+    return res.status(400).json({ error: "user_id and group_id are required" });
+  }
+
+  const userResult = await query(
+    "select u.role, p.can_view_assets, p.can_view_transactions, p.can_view_summary from users u left join user_permissions p on u.id = p.user_id where u.id = $1",
+    [userId]
+  );
+  const userRow = userResult.rows[0];
+  if (!userRow) {
+    return res.status(404).json({ error: "user not found" });
+  }
+
+  const allowed = {
+    assets: userRow.role === "admin" ? true : Boolean(userRow.can_view_assets),
+    transactions: userRow.role === "admin" ? true : Boolean(userRow.can_view_transactions),
+    summary: userRow.role === "admin" ? true : Boolean(userRow.can_view_summary)
+  };
+
+  const monthStartDay = await getMonthStartDay();
+  const period = getPeriodRange(monthStartDay);
+  if (!period) {
+    return res.status(400).json({ error: "invalid period" });
+  }
+
+  let assets = null;
+  if (allowed.assets) {
+    const assetsResult = await query(
+      "select count(*)::int as count, coalesce(sum(current_balance_cents), 0)::int as balance_cents from assets where group_id = $1",
+      [groupId]
+    );
+    assets = assetsResult.rows[0] || { count: 0, balance_cents: 0 };
+  }
+
+  let transactions = null;
+  if (allowed.transactions || allowed.summary) {
+    const txResult = await query(
+      `select
+        count(*)::int as count,
+        coalesce(sum(case when direction = 'deposit' then amount_cents else 0 end), 0)::int as deposits_cents,
+        coalesce(sum(case when direction = 'withdraw' then amount_cents else 0 end), 0)::int as withdrawals_cents
+      from transactions
+      where group_id = $1 and occurred_at >= $2 and occurred_at <= $3`,
+      [groupId, period.start, period.end]
+    );
+    const row = txResult.rows[0] || { count: 0, deposits_cents: 0, withdrawals_cents: 0 };
+    transactions = {
+      count: row.count,
+      deposits_cents: row.deposits_cents,
+      withdrawals_cents: row.withdrawals_cents,
+      net_cents: row.deposits_cents - row.withdrawals_cents
+    };
+  }
+
+  return res.json({
+    permissions: allowed,
+    period: { label: period.label, start_day: monthStartDay },
+    assets,
+    transactions
+  });
 }

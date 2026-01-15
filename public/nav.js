@@ -9,18 +9,23 @@
       <div class="topbar-inner">
         <nav class="topbar-nav">
           <a class="ghost-link" href="/">홈</a>
-          <a id="fixed-top-link" class="ghost-link" href="/fixed-expenses.html">고정지출</a>
+          <a id="assets-top-link" class="ghost-link" href="/assets.html">자산</a>
+          <a id="transactions-top-link" class="ghost-link" href="/transactions.html">입출금</a>
           <a id="admin-top-link" class="ghost-link hidden" href="/admin">관리자</a>
         </nav>
         <div class="topbar-mobile">
           <button id="nav-menu-btn" class="ghost" type="button">메뉴</button>
           <div id="nav-menu-panel" class="menu-panel hidden">
             <a class="ghost-link" href="/">홈</a>
-            <a id="fixed-mobile-link" class="ghost-link" href="/fixed-expenses.html">고정지출</a>
+            <a id="assets-mobile-link" class="ghost-link" href="/assets.html">자산</a>
+            <a id="transactions-mobile-link" class="ghost-link" href="/transactions.html">입출금</a>
             <a id="admin-mobile-link" class="ghost-link hidden" href="/admin">관리자</a>
           </div>
         </div>
         <p id="auth-status" class="status hidden"></p>
+        <div class="group-switch hidden">
+          <select id="group-select"></select>
+        </div>
         <div class="user-menu">
           <button id="user-menu-btn" class="ghost hidden" type="button">아이디</button>
           <div id="user-menu-panel" class="menu-panel hidden">
@@ -59,6 +64,8 @@
   const userMenuBtn = document.getElementById("user-menu-btn");
   const userMenuPanel = document.getElementById("user-menu-panel");
   const authStatus = document.getElementById("auth-status");
+  const groupSelect = document.getElementById("group-select");
+  const groupSwitch = document.querySelector(".group-switch");
   const changePasswordToggle = document.getElementById("change-password-toggle");
   const deleteAccountToggle = document.getElementById("delete-account-toggle");
   const changePasswordForm = document.getElementById("change-password-form");
@@ -230,17 +237,23 @@
   function applyPermissions(permissions, role, isAuthenticated) {
     const allowed = permissions || {};
     const isAdmin = role === "admin";
-    const canFixed = isAdmin || Boolean(allowed.fixed_expenses);
+    const canAssets = isAdmin || Boolean(allowed.assets);
+    const canTransactions = isAdmin || Boolean(allowed.transactions);
     document.body.classList.toggle("is-authenticated", Boolean(isAuthenticated));
 
-    const fixedTopLink = document.getElementById("fixed-top-link");
-    const fixedMobileLink = document.getElementById("fixed-mobile-link");
+    const assetsTopLink = document.getElementById("assets-top-link");
+    const assetsMobileLink = document.getElementById("assets-mobile-link");
+    const transactionsTopLink = document.getElementById("transactions-top-link");
+    const transactionsMobileLink = document.getElementById("transactions-mobile-link");
     const adminTopLink = document.getElementById("admin-top-link");
     const adminMobileLink = document.getElementById("admin-mobile-link");
 
     if (!isAuthenticated) {
-      fixedTopLink?.classList.add("hidden");
-      fixedMobileLink?.classList.add("hidden");
+      groupSwitch?.classList.add("hidden");
+      assetsTopLink?.classList.add("hidden");
+      assetsMobileLink?.classList.add("hidden");
+      transactionsTopLink?.classList.add("hidden");
+      transactionsMobileLink?.classList.add("hidden");
       adminTopLink?.classList.add("hidden");
       adminMobileLink?.classList.add("hidden");
       navMenuPanel?.classList.add("hidden");
@@ -252,18 +265,65 @@
       return;
     }
 
-    fixedTopLink?.classList.toggle("hidden", !canFixed);
-    fixedMobileLink?.classList.toggle("hidden", !canFixed);
+    assetsTopLink?.classList.toggle("hidden", !canAssets);
+    assetsMobileLink?.classList.toggle("hidden", !canAssets);
+    transactionsTopLink?.classList.toggle("hidden", !canTransactions);
+    transactionsMobileLink?.classList.toggle("hidden", !canTransactions);
     adminTopLink?.classList.toggle("hidden", !isAdmin);
     adminMobileLink?.classList.toggle("hidden", !isAdmin);
     userMenuBtn?.classList.remove("hidden");
+    groupSwitch?.classList.remove("hidden");
+  }
+
+  async function loadGroups(activeGroupId) {
+    if (!groupSelect) {
+      return;
+    }
+    try {
+      const data = await api("/auth/groups");
+      const groups = data.groups || [];
+      if (!groups.length) {
+        groupSelect.innerHTML = "";
+        groupSelect.classList.add("hidden");
+        return;
+      }
+      groupSelect.classList.remove("hidden");
+      groupSelect.innerHTML = groups
+        .map((group) => `<option value="${group.id}">${group.name}</option>`)
+        .join("");
+      if (activeGroupId) {
+        groupSelect.value = String(activeGroupId);
+      }
+    } catch (err) {
+      setStatus(err.message);
+    }
+  }
+
+  if (groupSelect && groupSelect.dataset.bound !== "true") {
+    groupSelect.addEventListener("change", async () => {
+      const value = Number(groupSelect.value);
+      if (!value) {
+        return;
+      }
+      try {
+        await api("/auth/active-group", {
+          method: "PUT",
+          body: JSON.stringify({ group_id: value })
+        });
+        window.location.reload();
+      } catch (err) {
+        setStatus(err.message);
+      }
+    });
+    groupSelect.dataset.bound = "true";
   }
 
   window.initNav = ({
     permissions = {},
     role = null,
     isAuthenticated = false,
-    username = ""
+    username = "",
+    activeGroupId = null
   } = {}) => {
     applyPermissions(permissions, role, isAuthenticated);
     bindNavMenu();
@@ -272,6 +332,9 @@
     bindUserActions();
     if (userMenuBtn && username) {
       userMenuBtn.textContent = username;
+    }
+    if (isAuthenticated) {
+      loadGroups(activeGroupId);
     }
   };
 })();

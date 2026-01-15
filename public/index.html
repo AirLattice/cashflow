@@ -101,30 +101,56 @@
           </div>
         </div>
       </section>
-      <section class="panel permission-section" data-permission="fixed_expenses">
+      <section class="panel permission-section" data-permission="assets">
         <div class="panel-head">
           <div>
-            <h2>고정 지출 항목</h2>
-            <p class="subhead">이번 달 적용되는 고정 지출을 표로 확인합니다.</p>
+            <h2>자산 현황</h2>
+            <p class="subhead">그룹에서 사용하는 자산 정보를 확인합니다.</p>
           </div>
           <div class="inline">
-            <a class="ghost-link" href="/fixed-expenses.html">전체 관리</a>
+            <a class="ghost-link" href="/assets.html">자산 관리</a>
           </div>
         </div>
         <div class="table-wrap">
           <table class="data-table">
             <thead>
               <tr>
-                <th>항목</th>
-                <th>월 금액</th>
-                <th>시작일</th>
-                <th>마지막 결제일</th>
-                <th>남은 금액</th>
+                <th>자산명</th>
+                <th>구분</th>
+                <th>발행기관</th>
+                <th>자산번호</th>
+                <th>잔액</th>
               </tr>
             </thead>
-            <tbody id="fixed-summary-body"></tbody>
+            <tbody id="assets-body"></tbody>
           </table>
-          <p id="fixed-summary-empty" class="hint hidden">표시할 항목이 없습니다.</p>
+          <p id="assets-empty" class="hint hidden">표시할 자산이 없습니다.</p>
+        </div>
+      </section>
+      <section class="panel permission-section" data-permission="transactions">
+        <div class="panel-head">
+          <div>
+            <h2>입출금 내역</h2>
+            <p class="subhead">가장 최근에 기록된 입출금 내역입니다.</p>
+          </div>
+          <div class="inline">
+            <a class="ghost-link" href="/transactions.html">전체 보기</a>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>일시</th>
+                <th>자산</th>
+                <th>구분</th>
+                <th>금액</th>
+                <th>작성자</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-body"></tbody>
+          </table>
+          <p id="transactions-empty" class="hint hidden">표시할 내역이 없습니다.</p>
         </div>
       </section>
 

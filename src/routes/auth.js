@@ -184,7 +184,7 @@ export async function logout(req, res) {
 
 export async function me(req, res) {
   const result = await query(
-    "select u.id, u.username, u.role, u.active_group_id, g.name as group_name, p.can_view_fixed_expenses, p.can_view_incomes, p.can_view_summary from users u left join groups g on u.active_group_id = g.id left join user_permissions p on u.id = p.user_id where u.id = $1",
+    "select u.id, u.username, u.role, u.active_group_id, g.name as group_name, p.can_view_assets, p.can_view_transactions, p.can_view_summary from users u left join groups g on u.active_group_id = g.id left join user_permissions p on u.id = p.user_id where u.id = $1",
     [req.user.id]
   );
   const user = result.rows[0];
@@ -199,12 +199,59 @@ export async function me(req, res) {
     active_group_id: user.active_group_id,
     group_name: user.group_name,
     permissions: {
-      fixed_expenses: Boolean(user.can_view_fixed_expenses),
-      incomes: Boolean(user.can_view_incomes),
+      assets: Boolean(user.can_view_assets),
+      transactions: Boolean(user.can_view_transactions),
       summary: Boolean(user.can_view_summary)
     },
     month_start_day: monthStartDay
   });
+}
+
+export async function listGroupsForUser(req, res) {
+  if (req.user.role === "admin") {
+    const result = await query("select id, name from groups order by name asc");
+    return res.json({ groups: result.rows });
+  }
+
+  const result = await query(
+    "select g.id, g.name from user_group_access uga join groups g on uga.group_id = g.id where uga.user_id = $1 order by g.name asc",
+    [req.user.id]
+  );
+  return res.json({ groups: result.rows });
+}
+
+export async function updateActiveGroup(req, res) {
+  const groupId = Number(req.body.group_id);
+  if (!groupId) {
+    return res.status(400).json({ error: "group_id is required" });
+  }
+
+  const groupResult = await query("select id, name from groups where id = $1", [groupId]);
+  const group = groupResult.rows[0];
+  if (!group) {
+    return res.status(404).json({ error: "group not found" });
+  }
+
+  if (req.user.role !== "admin") {
+    const access = await query(
+      "select 1 from user_group_access where user_id = $1 and group_id = $2",
+      [req.user.id, groupId]
+    );
+    if (access.rows.length === 0) {
+      return res.status(403).json({ error: "group access denied" });
+    }
+  }
+
+  await query("update users set active_group_id = $1 where id = $2", [
+    groupId,
+    req.user.id
+  ]);
+  await query(
+    "insert into user_group_access (user_id, group_id) values ($1, $2) on conflict do nothing",
+    [req.user.id, groupId]
+  );
+
+  return res.json({ ok: true, active_group_id: group.id, group_name: group.name });
 }
 
 export async function changePassword(req, res) {

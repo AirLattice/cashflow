@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>입출금 내역</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div id="topbar-root"></div>
+
+    <main class="page-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">입출금 내역</p>
+          <h1>입출금 기록</h1>
+          <p class="subhead">자산별 입출금 내역을 기록하고 확인합니다.</p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <p id="transactions-status" class="hint">로딩 중...</p>
+        <form id="filter-form" class="form grid">
+          <label>
+            시작일
+            <input type="date" id="filter-start" required />
+          </label>
+          <label>
+            종료일
+            <input type="date" id="filter-end" required />
+          </label>
+          <button type="submit" class="ghost">조회</button>
+        </form>
+        <button id="toggle-transaction-form" class="ghost" type="button">
+          내역 추가
+        </button>
+        <form id="transaction-form" class="form grid hidden">
+          <label>
+            자산
+            <select name="asset_id" id="asset-select" required></select>
+          </label>
+          <label>
+            구분
+            <select name="direction" required>
+              <option value="deposit">입금</option>
+              <option value="withdraw">출금</option>
+            </select>
+          </label>
+          <label>
+            금액 (원)
+            <input
+              type="text"
+              name="amount_cents"
+              inputmode="numeric"
+              data-money="true"
+              required
+            />
+          </label>
+          <label>
+            원금 (카드/대출)
+            <input
+              type="text"
+              name="principal_cents"
+              inputmode="numeric"
+              data-money="true"
+            />
+          </label>
+          <label>
+            분할 횟수
+            <input type="number" name="installment_count" min="1" />
+          </label>
+          <label>
+            이자율 (%)
+            <input type="number" name="interest_rate" min="0" step="0.01" />
+          </label>
+          <label>
+            메모
+            <input type="text" name="memo" />
+          </label>
+          <button type="submit">내역 추가</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>일시</th>
+                <th>자산</th>
+                <th>구분</th>
+                <th>금액</th>
+                <th>작성자</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="transactions-body"></tbody>
+          </table>
+          <p id="transactions-empty" class="hint hidden">입출금 내역이 없습니다.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/nav.js"></script>
+    <script src="/api.js"></script>
+    <script src="/form-utils.js"></script>
+    <script src="/transactions.js"></script>
+  </body>
+</html>

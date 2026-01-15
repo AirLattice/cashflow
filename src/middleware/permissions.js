@@ -14,8 +14,8 @@ export function requireAdmin(req, res, next) {
 
 export function requirePermission(permissionKey) {
   const columnMap = {
-    fixed_expenses: "can_view_fixed_expenses",
-    incomes: "can_view_incomes",
+    assets: "can_view_assets",
+    transactions: "can_view_transactions",
     summary: "can_view_summary"
   };
   const column = columnMap[permissionKey];

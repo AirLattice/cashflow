@@ -420,7 +420,8 @@ async function init() {
         permissions,
         role: me.role,
         isAuthenticated: true,
-        username: me.username
+        username: me.username,
+        activeGroupId: me.active_group_id
       });
     }
     if (!(me.role === "admin" || permissions.fixed_expenses)) {

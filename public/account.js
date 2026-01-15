@@ -125,7 +125,8 @@ api("/auth/me")
         permissions: data.permissions || {},
         role: data.role,
         isAuthenticated: true,
-        username: data.username
+        username: data.username,
+        activeGroupId: data.active_group_id
       });
     }
   })

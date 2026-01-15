@@ -9,16 +9,18 @@ import {
   refresh,
   logout,
   me,
+  listGroupsForUser,
+  updateActiveGroup,
   changePassword,
   deleteAccount
 } from "./routes/auth.js";
+import { listAssets, createAsset, updateAsset, deleteAsset } from "./routes/assets.js";
 import {
-  listFixedExpenses,
-  createFixedExpense,
-  updateFixedExpense,
-  deleteFixedExpense
-} from "./routes/fixedExpenses.js";
-import { listIncomes, createIncome, updateIncome, deleteIncome } from "./routes/incomes.js";
+  listTransactions,
+  createTransaction,
+  updateTransaction,
+  deleteTransaction
+} from "./routes/transactions.js";
 import { getSummary } from "./routes/summary.js";
 import { requireAuth } from "./middleware/auth.js";
 import {
@@ -33,7 +35,8 @@ import {
   getSettings,
   updateSettings,
   listGroups,
-  createGroup
+  createGroup,
+  getGroupSummary
 } from "./routes/admin.js";
 import { receiveWebSms } from "./routes/websms.js";
 import { query } from "./db.js";
@@ -85,33 +88,20 @@ app.post("/auth/login", login);
 app.post("/auth/refresh", refresh);
 app.post("/auth/logout", logout);
 app.get("/auth/me", requireAuth, me);
+app.get("/auth/groups", requireAuth, listGroupsForUser);
+app.put("/auth/active-group", requireAuth, updateActiveGroup);
 app.post("/auth/change-password", requireAuth, changePassword);
 app.post("/auth/delete-account", requireAuth, deleteAccount);
 
-app.get("/fixed-expenses", requireAuth, requirePermission("fixed_expenses"), listFixedExpenses);
-app.post(
-  "/fixed-expenses",
-  requireAuth,
-  requirePermission("fixed_expenses"),
-  createFixedExpense
-);
-app.put(
-  "/fixed-expenses/:id",
-  requireAuth,
-  requirePermission("fixed_expenses"),
-  updateFixedExpense
-);
-app.delete(
-  "/fixed-expenses/:id",
-  requireAuth,
-  requirePermission("fixed_expenses"),
-  deleteFixedExpense
-);
+app.get("/assets", requireAuth, requirePermission("assets"), listAssets);
+app.post("/assets", requireAuth, requirePermission("assets"), createAsset);
+app.put("/assets/:id", requireAuth, requirePermission("assets"), updateAsset);
+app.delete("/assets/:id", requireAuth, requirePermission("assets"), deleteAsset);
 
-app.get("/incomes", requireAuth, requirePermission("incomes"), listIncomes);
-app.post("/incomes", requireAuth, requirePermission("incomes"), createIncome);
-app.put("/incomes/:id", requireAuth, requirePermission("incomes"), updateIncome);
-app.delete("/incomes/:id", requireAuth, requirePermission("incomes"), deleteIncome);
+app.get("/transactions", requireAuth, requirePermission("transactions"), listTransactions);
+app.post("/transactions", requireAuth, requirePermission("transactions"), createTransaction);
+app.put("/transactions/:id", requireAuth, requirePermission("transactions"), updateTransaction);
+app.delete("/transactions/:id", requireAuth, requirePermission("transactions"), deleteTransaction);
 
 app.get("/summary", requireAuth, requirePermission("summary"), getSummary);
 
@@ -119,6 +109,7 @@ app.get("/admin/users", requireAuth, requireAdmin, listUsers);
 app.put("/admin/users/:id/permissions", requireAuth, requireAdmin, updateUserPermissions);
 app.get("/admin/groups", requireAuth, requireAdmin, listGroups);
 app.post("/admin/groups", requireAuth, requireAdmin, createGroup);
+app.get("/admin/group-summary", requireAuth, requireAdmin, getGroupSummary);
 app.get("/admin/settings", requireAuth, requireAdmin, getSettings);
 app.put("/admin/settings", requireAuth, requireAdmin, updateSettings);
 
@@ -141,7 +132,7 @@ async function ensureAdminSeed(attempt = 0) {
         [passwordHash, groupId]
       );
       await query(
-        "insert into user_permissions (user_id, can_view_fixed_expenses, can_view_incomes, can_view_summary) values ($1, true, true, true) on conflict do nothing",
+        "insert into user_permissions (user_id, can_view_assets, can_view_transactions, can_view_summary) values ($1, true, true, true) on conflict do nothing",
         [userResult.rows[0].id]
       );
       await query(

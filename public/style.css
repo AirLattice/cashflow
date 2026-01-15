@@ -76,8 +76,18 @@ body {
 }
 
 .user-menu {
-  margin-left: auto;
+  margin-left: 12px;
   position: relative;
+}
+
+.group-switch {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.group-switch select {
+  min-width: 140px;
 }
 
 .menu-panel {
@@ -454,7 +464,7 @@ button.ghost {
 }
 
 .admin-row {
-  grid-template-columns: 1fr 1.3fr 1fr;
+  grid-template-columns: 1fr 1.3fr 1fr 1.4fr;
 }
 
 .admin-identity {
@@ -549,6 +559,26 @@ button.ghost {
   gap: 12px;
   flex-wrap: wrap;
   align-items: center;
+}
+
+.admin-summary {
+  display: grid;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.admin-summary strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.summary-line {
+  margin-top: 2px;
+}
+
+.muted {
+  color: var(--muted);
 }
 
 .card-row small {

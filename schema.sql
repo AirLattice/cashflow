@@ -31,8 +31,8 @@ create table if not exists refresh_tokens (
 
 create table if not exists user_permissions (
   user_id bigint primary key references users(id) on delete cascade,
-  can_view_fixed_expenses boolean not null default false,
-  can_view_incomes boolean not null default false,
+  can_view_assets boolean not null default false,
+  can_view_transactions boolean not null default false,
   can_view_summary boolean not null default false,
   created_at timestamptz not null default now()
 );
@@ -43,30 +43,33 @@ create table if not exists app_settings (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists fixed_expenses (
+create table if not exists assets (
   id bigserial primary key,
-  user_id bigint not null references users(id) on delete cascade,
   group_id bigint not null references groups(id),
   name text not null,
-  total_amount_cents integer not null,
-  per_month_cents integer not null,
-  start_date date not null,
-  end_date date not null,
-  payment_type text not null default 'single',
-  installments_count integer,
-  interest_rate numeric,
-  total_interest_cents integer,
-  total_with_interest_cents integer,
-  remaining_cents integer,
-  created_at timestamptz not null default now()
+  issuer text not null,
+  asset_number text,
+  asset_type text not null,
+  current_balance_cents integer not null default 0,
+  created_at timestamptz not null default now(),
+  unique (group_id, name)
 );
 
-create table if not exists incomes (
+create unique index if not exists assets_group_asset_number_key
+  on assets (group_id, asset_number)
+  where asset_number is not null;
+
+create table if not exists transactions (
   id bigserial primary key,
-  user_id bigint not null references users(id) on delete cascade,
   group_id bigint not null references groups(id),
-  name text not null,
+  asset_id bigint not null references assets(id),
+  user_id bigint not null references users(id),
+  direction text not null,
   amount_cents integer not null,
-  income_date date not null,
+  principal_cents integer,
+  installment_count integer,
+  interest_rate numeric,
+  memo text,
+  occurred_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
