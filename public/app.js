@@ -11,12 +11,12 @@ const summaryMonth = document.getElementById("summary-month");
 const summaryIncome = document.getElementById("summary-income");
 const summaryExpenses = document.getElementById("summary-expenses");
 const summaryBalance = document.getElementById("summary-balance");
-const chartMonth = document.getElementById("chart-month");
-const chartBtn = document.getElementById("chart-btn");
 const incomeBar = document.getElementById("income-bar");
 const expenseBar = document.getElementById("expense-bar");
 const incomeBarValue = document.getElementById("income-bar-value");
 const expenseBarValue = document.getElementById("expense-bar-value");
+const fixedSummaryBody = document.getElementById("fixed-summary-body");
+const fixedSummaryEmpty = document.getElementById("fixed-summary-empty");
 const tabs = document.querySelectorAll(".tab");
 const permissionSections = document.querySelectorAll(".permission-section");
 const noAccessPanel = document.getElementById("no-access");
@@ -29,7 +29,9 @@ let currentRole = null;
 let currentUsername = "";
 
 function setStatus(message) {
-  authStatus.textContent = message;
+  if (authStatus) {
+    authStatus.textContent = message;
+  }
 }
 
 function setLoggedIn(isLoggedIn, username, role) {
@@ -66,13 +68,33 @@ function setLoggedIn(isLoggedIn, username, role) {
     if (typeof window.initNav === "function") {
       window.initNav({ isAuthenticated: false });
     }
-    summaryIncome.textContent = "-";
-    summaryExpenses.textContent = "-";
-    summaryBalance.textContent = "-";
-    incomeBar.style.width = "0%";
-    expenseBar.style.width = "0%";
-    incomeBarValue.textContent = "-";
-    expenseBarValue.textContent = "-";
+    if (summaryIncome) {
+      summaryIncome.textContent = "-";
+    }
+    if (summaryExpenses) {
+      summaryExpenses.textContent = "-";
+    }
+    if (summaryBalance) {
+      summaryBalance.textContent = "-";
+    }
+    if (incomeBar) {
+      incomeBar.style.width = "0%";
+    }
+    if (expenseBar) {
+      expenseBar.style.width = "0%";
+    }
+    if (incomeBarValue) {
+      incomeBarValue.textContent = "-";
+    }
+    if (expenseBarValue) {
+      expenseBarValue.textContent = "-";
+    }
+    if (fixedSummaryBody) {
+      fixedSummaryBody.innerHTML = "";
+    }
+    if (fixedSummaryEmpty) {
+      fixedSummaryEmpty.classList.add("hidden");
+    }
   }
 }
 
@@ -101,7 +123,11 @@ function applyPermissions(permissions, role, isAuthenticated = true) {
       anyVisible = true;
     }
   });
-  noAccessPanel.classList.toggle("hidden", anyVisible);
+  if (permissionSections.length === 0) {
+    noAccessPanel?.classList.add("hidden");
+  } else {
+    noAccessPanel?.classList.toggle("hidden", anyVisible);
+  }
 }
 
 function pad(value) {
@@ -124,17 +150,22 @@ function getCurrentMonthKey(monthStartDay) {
 
 function setDefaultMonthInputs(monthStartDay) {
   const key = getCurrentMonthKey(monthStartDay);
-  summaryMonth.value = key;
-  chartMonth.value = key;
+  if (summaryMonth) {
+    summaryMonth.value = key;
+  }
 }
 
 async function loadInitialData() {
   const isAdmin = currentRole === "admin";
   const canSummary = isAdmin || currentPermissions.summary;
+  const canFixed = isAdmin || currentPermissions.fixed_expenses;
 
-  if (canSummary) {
+  if (canSummary && summaryMonth) {
     await loadSummary();
     await loadChart();
+  }
+  if (canFixed && summaryMonth) {
+    await loadFixedExpenses();
   }
 }
 
@@ -224,40 +255,110 @@ function monthValue(date = new Date()) {
 }
 
 async function loadSummary() {
+  if (!summaryMonth) {
+    return;
+  }
   if (!summaryMonth.value) {
     summaryMonth.value = monthValue();
   }
   try {
     const data = await api(`/summary?month=${summaryMonth.value}`);
-    summaryIncome.textContent = formatter.format(data.total_income_cents);
-    summaryExpenses.textContent = formatter.format(data.total_fixed_expense_cents);
-    summaryBalance.textContent = formatter.format(data.balance_cents);
+    if (summaryIncome) {
+      summaryIncome.textContent = formatter.format(data.total_income_cents);
+    }
+    if (summaryExpenses) {
+      summaryExpenses.textContent = formatter.format(data.total_fixed_expense_cents);
+    }
+    if (summaryBalance) {
+      summaryBalance.textContent = formatter.format(data.balance_cents);
+    }
   } catch (err) {
     setStatus(err.message);
   }
 }
 
 async function loadChart() {
-  const month = chartMonth.value || monthValue();
-  chartMonth.value = month;
+  const month = summaryMonth?.value || monthValue();
   try {
     const data = await api(`/summary?month=${month}`);
     const income = Number(data.total_income_cents || 0);
     const expense = Number(data.total_fixed_expense_cents || 0);
     const maxValue = Math.max(income, expense, 1);
 
-    incomeBar.style.width = `${(income / maxValue) * 100}%`;
-    expenseBar.style.width = `${(expense / maxValue) * 100}%`;
-    incomeBarValue.textContent = formatter.format(income);
-    expenseBarValue.textContent = formatter.format(expense);
+    if (incomeBar) {
+      incomeBar.style.width = `${(income / maxValue) * 100}%`;
+    }
+    if (expenseBar) {
+      expenseBar.style.width = `${(expense / maxValue) * 100}%`;
+    }
+    if (incomeBarValue) {
+      incomeBarValue.textContent = formatter.format(income);
+    }
+    if (expenseBarValue) {
+      expenseBarValue.textContent = formatter.format(expense);
+    }
   } catch (err) {
     setStatus(err.message);
   }
 }
 
+function formatDate(value) {
+  if (!value) {
+    return "-";
+  }
+  return String(value).slice(0, 10);
+}
 
-summaryBtn.addEventListener("click", loadSummary);
-chartBtn.addEventListener("click", loadChart);
+function renderFixedSummary(items) {
+  if (!fixedSummaryBody || !fixedSummaryEmpty) {
+    return;
+  }
+  if (!items.length) {
+    fixedSummaryBody.innerHTML = "";
+    fixedSummaryEmpty.classList.remove("hidden");
+    return;
+  }
+  fixedSummaryEmpty.classList.add("hidden");
+  const rows = items.slice(0, 8).map((item) => {
+    const perMonth = formatter.format(item.per_month_cents || 0);
+    const remaining = formatter.format(item.remaining_cents || 0);
+    return `
+      <tr>
+        <td>${item.name}</td>
+        <td>${perMonth}원</td>
+        <td>${formatDate(item.start_date)}</td>
+        <td>${formatDate(item.end_date)}</td>
+        <td>${remaining}원</td>
+      </tr>
+    `;
+  });
+  fixedSummaryBody.innerHTML = rows.join("");
+}
+
+async function loadFixedExpenses() {
+  if (!summaryMonth) {
+    return;
+  }
+  const month = summaryMonth.value || monthValue();
+  try {
+    const data = await api(`/fixed-expenses?month=${month}`);
+    renderFixedSummary(data.items || []);
+  } catch (err) {
+    if (fixedSummaryEmpty) {
+      fixedSummaryEmpty.textContent = "고정 지출 데이터를 불러오지 못했습니다.";
+      fixedSummaryEmpty.classList.remove("hidden");
+    }
+  }
+}
+
+
+if (summaryBtn) {
+  summaryBtn.addEventListener("click", async () => {
+    await loadSummary();
+    await loadChart();
+    await loadFixedExpenses();
+  });
+}
 loginForm.addEventListener("submit", handleLogin);
 registerForm.addEventListener("submit", handleRegister);
 
@@ -265,7 +366,8 @@ tabs.forEach((tab) => {
   tab.addEventListener("click", () => setTab(tab.dataset.tab));
 });
 
-summaryMonth.value = monthValue();
-chartMonth.value = monthValue();
+if (summaryMonth) {
+  summaryMonth.value = monthValue();
+}
 
 loadProfile();

@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import {
   register,
   login,
@@ -41,6 +42,34 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use((req, res, next) => {
+  if (req.method !== "GET") {
+    return next();
+  }
+
+  const accept = req.headers.accept || "";
+  const wantsHtml = accept.includes("text/html");
+  if (!wantsHtml) {
+    return next();
+  }
+
+  const path = req.path;
+  if (path === "/" || path === "/index.html" || path === "/health" || path.startsWith("/auth/")) {
+    return next();
+  }
+
+  const token = req.cookies?.access_token;
+  if (!token) {
+    return res.redirect("/");
+  }
+
+  try {
+    jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    return next();
+  } catch (err) {
+    return res.redirect("/");
+  }
+});
 app.use(express.static("public"));
 
 app.get("/health", (req, res) => {

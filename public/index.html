@@ -61,39 +61,13 @@
     <main class="layout requires-auth-grid">
       <section class="panel permission-section" data-permission="summary">
         <div class="panel-head">
-          <h2>월 수입/지출 비교</h2>
-          <div class="inline">
-            <input type="month" id="chart-month" />
-            <button id="chart-btn" type="button">불러오기</button>
+          <div>
+            <h2>이달 자금 흐름</h2>
+            <p class="subhead">월별 수입과 고정 지출을 빠르게 비교합니다.</p>
           </div>
-        </div>
-        <div class="chart">
-          <div class="bar-group">
-            <div class="bar-track">
-              <div id="income-bar" class="bar fill-income"></div>
-            </div>
-            <div class="bar-label">
-              <span>총 수입</span>
-              <strong id="income-bar-value">-</strong>
-            </div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-track">
-              <div id="expense-bar" class="bar fill-expense"></div>
-            </div>
-            <div class="bar-label">
-              <span>총 지출</span>
-              <strong id="expense-bar-value">-</strong>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="panel permission-section" data-permission="summary">
-        <div class="panel-head">
-          <h2>월 요약</h2>
           <div class="inline">
             <input type="month" id="summary-month" />
-            <button id="summary-btn" type="button">불러오기</button>
+            <button id="summary-btn" type="button">조회</button>
           </div>
         </div>
         <div class="summary-grid">
@@ -109,6 +83,48 @@
             <span>잔액</span>
             <strong id="summary-balance">-</strong>
           </div>
+        </div>
+        <div class="flow-meter">
+          <div class="meter-row">
+            <span>총 수입</span>
+            <strong id="income-bar-value">-</strong>
+          </div>
+          <div class="bar-track">
+            <div id="income-bar" class="bar fill-income"></div>
+          </div>
+          <div class="meter-row">
+            <span>총 지출</span>
+            <strong id="expense-bar-value">-</strong>
+          </div>
+          <div class="bar-track">
+            <div id="expense-bar" class="bar fill-expense"></div>
+          </div>
+        </div>
+      </section>
+      <section class="panel permission-section" data-permission="fixed_expenses">
+        <div class="panel-head">
+          <div>
+            <h2>고정 지출 항목</h2>
+            <p class="subhead">이번 달 적용되는 고정 지출을 표로 확인합니다.</p>
+          </div>
+          <div class="inline">
+            <a class="ghost-link" href="/fixed-expenses.html">전체 관리</a>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>항목</th>
+                <th>월 금액</th>
+                <th>시작일</th>
+                <th>마지막 결제일</th>
+                <th>남은 금액</th>
+              </tr>
+            </thead>
+            <tbody id="fixed-summary-body"></tbody>
+          </table>
+          <p id="fixed-summary-empty" class="hint hidden">표시할 항목이 없습니다.</p>
         </div>
       </section>
 
