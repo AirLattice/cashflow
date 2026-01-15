@@ -82,5 +82,14 @@
 - users 1:N fixed_expenses
 - users 1:N incomes
 
+## 관계 다이어그램 (ASCII)
+```
+users ──┬──────────────< refresh_tokens
+        ├─────────────── user_permissions
+        ├──────────────< fixed_expenses >────────── groups
+        ├──────────────< incomes       >────────── groups
+        └──< user_group_access >─────── groups
+```
+
 ## 참고
 - 초기 그룹은 'family'로 생성되며, 기존 사용자에 기본으로 연결됨.
