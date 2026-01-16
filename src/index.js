@@ -14,7 +14,13 @@ import {
   changePassword,
   deleteAccount
 } from "./routes/auth.js";
-import { listAssets, createAsset, updateAsset, deleteAsset } from "./routes/assets.js";
+import {
+  listAssets,
+  createAsset,
+  updateAsset,
+  deleteAsset,
+  updateAssetHidden
+} from "./routes/assets.js";
 import {
   listTransactions,
   createTransaction,
@@ -92,6 +98,7 @@ app.post("/auth/delete-account", requireAuth, deleteAccount);
 app.get("/assets", requireAuth, requirePermission("assets"), listAssets);
 app.post("/assets", requireAuth, requirePermission("assets"), createAsset);
 app.put("/assets/:id", requireAuth, requirePermission("assets"), updateAsset);
+app.put("/assets/:id/hidden", requireAuth, requirePermission("assets"), updateAssetHidden);
 app.delete("/assets/:id", requireAuth, requirePermission("assets"), deleteAsset);
 
 app.get("/transactions", requireAuth, requirePermission("transactions"), listTransactions);

@@ -6,9 +6,12 @@ export async function listAssets(req, res) {
   if (!req.user.group_id) {
     return res.status(400).json({ error: "group not set" });
   }
+  const includeHidden = req.query.include_hidden === "1";
   const result = await query(
-    "select * from assets where group_id = $1 order by id asc",
-    [req.user.group_id]
+    `select * from assets
+     where group_id = $1 and ($2::boolean = true or hidden = false)
+     order by id asc`,
+    [req.user.group_id, includeHidden]
   );
   return res.json({ items: result.rows });
 }
@@ -128,4 +131,24 @@ export async function deleteAsset(req, res) {
   }
 
   return res.json({ ok: true });
+}
+
+export async function updateAssetHidden(req, res) {
+  if (!req.user.group_id) {
+    return res.status(400).json({ error: "group not set" });
+  }
+  const hidden = Boolean(req.body?.hidden);
+  const result = await query(
+    `update assets
+     set hidden = $1,
+         filter_text = case when $1 then null else filter_text end
+     where id = $2 and group_id = $3
+     returning *`,
+    [hidden, req.params.id, req.user.group_id]
+  );
+  const item = result.rows[0];
+  if (!item) {
+    return res.status(404).json({ error: "not found" });
+  }
+  return res.json({ item });
 }

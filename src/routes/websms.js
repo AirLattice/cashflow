@@ -78,7 +78,7 @@ export async function receiveWebSms(req, res) {
 
   if (req.websmsUserId) {
     const assetsResult = await query(
-      "select a.id, a.group_id, a.asset_type, a.filter_text from assets a join user_group_access uga on uga.group_id = a.group_id where uga.user_id = $1 and a.filter_text is not null and a.filter_text <> '' order by a.id asc",
+      "select a.id, a.group_id, a.asset_type, a.filter_text from assets a join user_group_access uga on uga.group_id = a.group_id where uga.user_id = $1 and a.hidden = false and a.filter_text is not null and a.filter_text <> '' order by a.id asc",
       [req.websmsUserId]
     );
     const assets = assetsResult.rows;
