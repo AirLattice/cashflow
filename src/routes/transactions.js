@@ -1,4 +1,4 @@
-import { query } from "../db.js";
+import { getClient, query } from "../db.js";
 import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
 
 const DIRECTIONS = new Set(["deposit", "withdraw"]);
@@ -23,6 +23,21 @@ async function resolveAsset(req, assetId, assetName) {
 
 function isCardOrLoan(type) {
   return type === "card" || type === "loan";
+}
+
+async function insertTransactionLog(client, payload) {
+  const { transactionId, groupId, userId, action, beforeData, afterData } = payload;
+  await client.query(
+    "insert into transaction_logs (transaction_id, group_id, user_id, action, before_data, after_data) values ($1, $2, $3, $4, $5, $6)",
+    [
+      transactionId || null,
+      groupId,
+      userId,
+      action,
+      beforeData ? JSON.stringify(beforeData) : null,
+      afterData ? JSON.stringify(afterData) : null
+    ]
+  );
 }
 
 export async function listTransactions(req, res) {
@@ -114,22 +129,40 @@ export async function createTransaction(req, res) {
     }
   }
 
-  const result = await query(
-    "insert into transactions (group_id, asset_id, user_id, direction, amount_cents, principal_cents, installment_count, interest_rate, memo) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *",
-    [
-      req.user.group_id,
-      asset.id,
-      req.user.id,
-      direction,
-      amount,
-      principal_cents || null,
-      installment_count || null,
-      interest_rate || null,
-      memo || null
-    ]
-  );
-
-  return res.status(201).json({ item: result.rows[0] });
+  const client = await getClient();
+  try {
+    await client.query("begin");
+    const result = await client.query(
+      "insert into transactions (group_id, asset_id, user_id, direction, amount_cents, principal_cents, installment_count, interest_rate, memo) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *",
+      [
+        req.user.group_id,
+        asset.id,
+        req.user.id,
+        direction,
+        amount,
+        principal_cents || null,
+        installment_count || null,
+        interest_rate || null,
+        memo || null
+      ]
+    );
+    const item = result.rows[0];
+    await insertTransactionLog(client, {
+      transactionId: item.id,
+      groupId: req.user.group_id,
+      userId: req.user.id,
+      action: "create",
+      beforeData: null,
+      afterData: item
+    });
+    await client.query("commit");
+    return res.status(201).json({ item });
+  } catch (err) {
+    await client.query("rollback");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function updateTransaction(req, res) {
@@ -155,48 +188,70 @@ export async function updateTransaction(req, res) {
     return res.status(400).json({ error: "invalid amount_cents" });
   }
 
-  const existing = await query(
-    "select user_id from transactions where id = $1 and group_id = $2",
-    [req.params.id, req.user.group_id]
-  );
-  const row = existing.rows[0];
-  if (!row) {
-    return res.status(404).json({ error: "not found" });
-  }
-  if (req.user.role !== "admin" && row.user_id !== req.user.id) {
-    return res.status(403).json({ error: "not allowed" });
-  }
-
-  const asset = await resolveAsset(req, asset_id, asset_name);
-  if (!asset) {
-    return res.status(404).json({ error: "asset not found" });
-  }
-
-  if (isCardOrLoan(asset.asset_type)) {
-    const principal = Number(principal_cents);
-    const installments = Number(installment_count);
-    const rate = Number(interest_rate);
-    if (!Number.isFinite(principal) || !Number.isFinite(installments) || !Number.isFinite(rate)) {
-      return res.status(400).json({ error: "missing installment fields" });
+  const client = await getClient();
+  try {
+    await client.query("begin");
+    const existing = await client.query(
+      "select * from transactions where id = $1 and group_id = $2",
+      [req.params.id, req.user.group_id]
+    );
+    const row = existing.rows[0];
+    if (!row) {
+      await client.query("rollback");
+      return res.status(404).json({ error: "not found" });
     }
+    if (req.user.role !== "admin" && row.user_id !== req.user.id) {
+      await client.query("rollback");
+      return res.status(403).json({ error: "not allowed" });
+    }
+
+    const asset = await resolveAsset(req, asset_id, asset_name);
+    if (!asset) {
+      await client.query("rollback");
+      return res.status(404).json({ error: "asset not found" });
+    }
+
+    if (isCardOrLoan(asset.asset_type)) {
+      const principal = Number(principal_cents);
+      const installments = Number(installment_count);
+      const rate = Number(interest_rate);
+      if (!Number.isFinite(principal) || !Number.isFinite(installments) || !Number.isFinite(rate)) {
+        await client.query("rollback");
+        return res.status(400).json({ error: "missing installment fields" });
+      }
+    }
+
+    const result = await client.query(
+      "update transactions set asset_id = $1, direction = $2, amount_cents = $3, principal_cents = $4, installment_count = $5, interest_rate = $6, memo = $7 where id = $8 and group_id = $9 returning *",
+      [
+        asset.id,
+        direction,
+        amount,
+        principal_cents || null,
+        installment_count || null,
+        interest_rate || null,
+        memo || null,
+        req.params.id,
+        req.user.group_id
+      ]
+    );
+    const item = result.rows[0];
+    await insertTransactionLog(client, {
+      transactionId: item.id,
+      groupId: req.user.group_id,
+      userId: req.user.id,
+      action: "update",
+      beforeData: row,
+      afterData: item
+    });
+    await client.query("commit");
+    return res.json({ item });
+  } catch (err) {
+    await client.query("rollback");
+    throw err;
+  } finally {
+    client.release();
   }
-
-  const result = await query(
-    "update transactions set asset_id = $1, direction = $2, amount_cents = $3, principal_cents = $4, installment_count = $5, interest_rate = $6, memo = $7 where id = $8 and group_id = $9 returning *",
-    [
-      asset.id,
-      direction,
-      amount,
-      principal_cents || null,
-      installment_count || null,
-      interest_rate || null,
-      memo || null,
-      req.params.id,
-      req.user.group_id
-    ]
-  );
-
-  return res.json({ item: result.rows[0] });
 }
 
 export async function deleteTransaction(req, res) {
@@ -204,22 +259,51 @@ export async function deleteTransaction(req, res) {
     return res.status(400).json({ error: "group not set" });
   }
 
-  const existing = await query(
-    "select user_id from transactions where id = $1 and group_id = $2",
-    [req.params.id, req.user.group_id]
-  );
-  const row = existing.rows[0];
-  if (!row) {
-    return res.status(404).json({ error: "not found" });
-  }
-  if (req.user.role !== "admin" && row.user_id !== req.user.id) {
-    return res.status(403).json({ error: "not allowed" });
-  }
+  const client = await getClient();
+  try {
+    await client.query("begin");
+    const existing = await client.query(
+      "select * from transactions where id = $1 and group_id = $2",
+      [req.params.id, req.user.group_id]
+    );
+    const row = existing.rows[0];
+    if (!row) {
+      await client.query("rollback");
+      return res.status(404).json({ error: "not found" });
+    }
+    if (req.user.role !== "admin" && row.user_id !== req.user.id) {
+      await client.query("rollback");
+      return res.status(403).json({ error: "not allowed" });
+    }
 
-  await query("delete from transactions where id = $1 and group_id = $2", [
-    req.params.id,
-    req.user.group_id
-  ]);
+    const amount = Number(row.amount_cents);
+    const delta = row.direction === "deposit" ? -amount : amount;
 
-  return res.json({ ok: true });
+    await client.query("delete from transactions where id = $1 and group_id = $2", [
+      req.params.id,
+      req.user.group_id
+    ]);
+
+    await client.query(
+      "update assets set current_balance_cents = current_balance_cents + $1 where id = $2 and group_id = $3",
+      [delta, row.asset_id, req.user.group_id]
+    );
+
+    await insertTransactionLog(client, {
+      transactionId: row.id,
+      groupId: req.user.group_id,
+      userId: req.user.id,
+      action: "delete",
+      beforeData: row,
+      afterData: null
+    });
+
+    await client.query("commit");
+    return res.json({ ok: true });
+  } catch (err) {
+    await client.query("rollback");
+    throw err;
+  } finally {
+    client.release();
+  }
 }

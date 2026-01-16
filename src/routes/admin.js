@@ -1,6 +1,8 @@
 import { query } from "../db.js";
 import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
 
+const TRANSACTION_LOG_LIMIT = 200;
+
 export async function listUsers(req, res) {
   const result = await query(
     `select
@@ -255,4 +257,33 @@ export async function getGroupSummary(req, res) {
     assets,
     transactions
   });
+}
+
+export async function listTransactionLogs(req, res) {
+  const requestedGroupId = req.query.group_id ? Number(req.query.group_id) : null;
+  const groupId = requestedGroupId || req.user.group_id;
+  if (!groupId) {
+    return res.json({ items: [] });
+  }
+
+  const result = await query(
+    `select
+        l.id,
+        l.transaction_id,
+        l.group_id,
+        l.user_id,
+        u.username,
+        l.action,
+        l.before_data,
+        l.after_data,
+        l.created_at
+      from transaction_logs l
+      left join users u on l.user_id = u.id
+      where l.group_id = $1
+      order by l.created_at desc, l.id desc
+      limit $2`,
+    [groupId, TRANSACTION_LOG_LIMIT]
+  );
+
+  return res.json({ items: result.rows });
 }
