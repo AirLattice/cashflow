@@ -100,7 +100,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 10px;
   box-shadow: var(--shadow);
-  padding: 12px;
+  padding: 4px 14px;
   display: grid;
   gap: 12px;
   z-index: 20;
@@ -142,7 +142,7 @@ h1 {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 16px;
+  padding: 4px 14px;
   box-shadow: var(--shadow);
 }
 
@@ -185,7 +185,7 @@ h1 {
   width: 100%;
   max-width: 100%;
   margin-top: 12px;
-  padding: 12px;
+  padding: 4px 14px;
   border-radius: 11px;
   border: 1px solid var(--line);
   background: #ffffff;
@@ -324,7 +324,7 @@ button.ghost {
   background: var(--card);
   border-radius: 12px;
   border: 1px solid var(--line);
-  padding: 16px;
+  padding: 4px 14px;
   box-shadow: var(--shadow);
 }
 
@@ -397,7 +397,7 @@ button.ghost {
 }
 
 .summary-item {
-  padding: 12px;
+  padding: 4px 14px;
   border-radius: 8px;
   border: 1px solid var(--line);
   background: #f8faff;
@@ -449,7 +449,7 @@ button.ghost {
 
 .data-table th,
 .data-table td {
-  padding: 8px 10px;
+  padding: 4px 14px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   font-size: 0.85rem;
@@ -470,7 +470,7 @@ button.ghost {
   grid-template-columns: 1.2fr 1fr 1fr auto;
   gap: 10px;
   align-items: center;
-  padding: 10px 12px;
+  padding: 4px 14px;
   border-radius: 10px;
   border: 1px solid var(--line);
   background: #ffffff;
@@ -626,7 +626,7 @@ button.ghost {
   }
 
   .data-table tr {
-    padding: 10px;
+    padding: 4px 14px;
     border-radius: 10px;
     border: 1px solid var(--line);
     background: var(--card);
