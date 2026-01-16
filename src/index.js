@@ -74,6 +74,10 @@ app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
 
+app.get("/admin", (req, res) => {
+  res.redirect("/admin/index.html");
+});
+
 
 app.post("/auth/register", register);
 app.post("/auth/login", login);

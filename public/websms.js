@@ -3,7 +3,6 @@ const bodyEl = document.getElementById("websms-body");
 const emptyEl = document.getElementById("websms-empty");
 const deniedEl = document.getElementById("websms-denied");
 const panelEl = document.getElementById("websms-panel");
-const groupSelect = document.getElementById("websms-group-select");
 
 async function api(path, options = {}) {
   const request = window.ApiClient?.request;
@@ -38,34 +37,8 @@ function renderRows(items) {
   bodyEl.innerHTML = rows.join("");
 }
 
-async function loadGroups(activeGroupId) {
-  if (!groupSelect) {
-    return;
-  }
-  try {
-    const data = await api("/auth/groups");
-    const groups = data.groups || [];
-    if (!groups.length) {
-      groupSelect.innerHTML = "";
-      groupSelect.classList.add("hidden");
-      return;
-    }
-    groupSelect.classList.remove("hidden");
-    groupSelect.innerHTML = groups
-      .map((group) => `<option value="${group.id}">${group.name}</option>`)
-      .join("");
-    if (activeGroupId) {
-      groupSelect.value = String(activeGroupId);
-    }
-  } catch (err) {
-    setStatus(err.message);
-  }
-}
-
 async function loadLogs() {
-  const groupId = groupSelect?.value;
-  const query = groupId ? `?group_id=${groupId}` : "";
-  const data = await api(`/admin/websms-logs${query}`);
+  const data = await api("/admin/websms-logs");
   renderRows(data.items || []);
   setStatus("WebSMS 로그");
 }
@@ -87,7 +60,6 @@ async function init() {
       panelEl.classList.add("hidden");
       return;
     }
-    await loadGroups(me.active_group_id);
     await loadLogs();
   } catch (err) {
     deniedEl.classList.remove("hidden");
@@ -95,9 +67,5 @@ async function init() {
     setStatus(err.message);
   }
 }
-
-groupSelect?.addEventListener("change", () => {
-  loadLogs();
-});
 
 init();
