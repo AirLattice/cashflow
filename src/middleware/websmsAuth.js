@@ -1,41 +1,38 @@
-const fallbackKey = "websms_temp_1f4c9b7e0d2a4b7e9c1f";
-const websmsApiKey = process.env.WEBSMS_API_KEY || fallbackKey;
-
 import { query } from "../db.js";
 
-async function resolveGroupByKey(token) {
+async function resolveUserByKey(token) {
   const now = Date.now();
   const cached = keyCache.get(token);
   if (cached && cached.expiresAt > now) {
-    return cached.groupId;
+    return cached;
   }
   if (!token) {
     return null;
   }
   const result = await query(
-    "select group_id from websms_api_keys where api_key = $1 limit 1",
+    "select u.id, u.active_group_id from user_api_keys k join users u on k.user_id = u.id where k.api_key = $1 limit 1",
     [token]
   );
-  if (result.rows[0]?.group_id) {
-    keyCache.set(token, { groupId: result.rows[0].group_id, expiresAt: now + CACHE_TTL_MS });
-    return result.rows[0].group_id;
+  const row = result.rows[0];
+  if (!row) {
+    return null;
   }
-  if (token === websmsApiKey) {
+
+  let groupId = row.active_group_id;
+  if (!groupId) {
     const groupResult = await query(
-      "select id from groups where name = 'family' limit 1"
+      "select group_id from user_group_access where user_id = $1 order by created_at asc limit 1",
+      [row.id]
     );
-    const groupId = groupResult.rows[0]?.id;
-    if (!groupId) {
-      return null;
+    groupId = groupResult.rows[0]?.group_id || null;
+    if (groupId) {
+      await query("update users set active_group_id = $1 where id = $2", [groupId, row.id]);
     }
-    await query(
-      "insert into websms_api_keys (group_id, api_key) values ($1, $2) on conflict do nothing",
-      [groupId, token]
-    );
-    keyCache.set(token, { groupId, expiresAt: now + CACHE_TTL_MS });
-    return groupId;
   }
-  return null;
+
+  const payload = { userId: row.id, groupId };
+  keyCache.set(token, { ...payload, expiresAt: now + CACHE_TTL_MS });
+  return payload;
 }
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -50,21 +47,14 @@ export function requireWebSmsApiKey(req, res, next) {
     token = authHeader.slice(7).trim();
   }
 
-  return resolveGroupByKey(token)
-    .then((groupId) => {
-      if (!groupId) {
+  return resolveUserByKey(token)
+    .then((payload) => {
+      if (!payload?.userId) {
         return res.status(401).json({ error: "invalid api key" });
       }
-      req.websmsGroupId = groupId;
+      req.websmsUserId = payload.userId;
+      req.websmsGroupId = payload.groupId;
       return next();
     })
     .catch(() => res.status(500).json({ error: "failed to authorize" }));
-}
-
-export function getWebSmsApiKey() {
-  return websmsApiKey;
-}
-
-export function isWebSmsFallbackKey() {
-  return !process.env.WEBSMS_API_KEY;
 }

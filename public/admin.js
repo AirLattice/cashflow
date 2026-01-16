@@ -7,7 +7,7 @@ const deniedPanel = document.getElementById("admin-denied");
 const groupForm = document.getElementById("group-form");
 const groupNameInput = document.getElementById("group-name");
 const websmsForm = document.getElementById("websms-form");
-const websmsGroupSelect = document.getElementById("websms-group-select");
+const websmsUserSelect = document.getElementById("websms-user-select");
 const websmsKeysBody = document.getElementById("websms-keys-body");
 const websmsKeysEmpty = document.getElementById("websms-keys-empty");
 let groupOptions = [];
@@ -123,9 +123,10 @@ async function loadGroups() {
   try {
     const data = await api("/admin/groups");
     groupOptions = data.groups || [];
-    if (websmsGroupSelect) {
-      websmsGroupSelect.innerHTML = groupOptions
-        .map((group) => `<option value="${group.id}">${group.name}</option>`)
+    const users = await api("/admin/users");
+    if (websmsUserSelect) {
+      websmsUserSelect.innerHTML = (users.users || [])
+        .map((user) => `<option value="${user.id}">${user.username}</option>`)
         .join("");
     }
   } catch (err) {
@@ -147,7 +148,7 @@ function renderWebSmsKeys(items) {
     const created = item.created_at ? item.created_at.replace("T", " ").replace("Z", "") : "-";
     return `
       <tr>
-        <td data-label="그룹">${item.group_name || "-"}</td>
+        <td data-label="사용자">${item.username || "-"}</td>
         <td data-label="API 키">${item.api_key}</td>
         <td data-label="생성일">${created}</td>
       </tr>
@@ -294,15 +295,15 @@ groupForm.addEventListener("submit", async (event) => {
 
 websmsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const groupId = Number(websmsGroupSelect.value);
-  if (!groupId) {
-    setStatus("그룹을 선택해주세요.");
+  const userId = Number(websmsUserSelect.value);
+  if (!userId) {
+    setStatus("사용자를 선택해주세요.");
     return;
   }
   try {
     await api("/admin/websms-keys", {
       method: "POST",
-      body: JSON.stringify({ group_id: groupId })
+      body: JSON.stringify({ user_id: userId })
     });
     setStatus("WebSMS 키가 생성되었습니다.");
     await loadWebSmsKeys();

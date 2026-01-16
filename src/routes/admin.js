@@ -136,30 +136,30 @@ export async function updateSettings(req, res) {
 
 export async function listWebSmsKeys(req, res) {
   const result = await query(
-    "select k.id, k.group_id, g.name as group_name, k.api_key, k.created_at from websms_api_keys k join groups g on k.group_id = g.id order by g.name asc, k.created_at desc"
+    "select k.id, k.user_id, u.username, k.api_key, k.created_at from user_api_keys k join users u on k.user_id = u.id order by u.username asc, k.created_at desc"
   );
   return res.json({ items: result.rows });
 }
 
 export async function createWebSmsKey(req, res) {
-  const groupId = Number(req.body.group_id);
-  if (!groupId) {
-    return res.status(400).json({ error: "group_id is required" });
+  const userId = Number(req.body.user_id);
+  if (!userId) {
+    return res.status(400).json({ error: "user_id is required" });
   }
-  const groupResult = await query("select id, name from groups where id = $1", [groupId]);
-  const group = groupResult.rows[0];
-  if (!group) {
-    return res.status(404).json({ error: "group not found" });
+  const userResult = await query("select id, username from users where id = $1", [userId]);
+  const user = userResult.rows[0];
+  if (!user) {
+    return res.status(404).json({ error: "user not found" });
   }
 
   const apiKey = crypto.randomBytes(24).toString("base64url");
   const result = await query(
-    "insert into websms_api_keys (group_id, api_key) values ($1, $2) returning id, group_id, api_key, created_at",
-    [groupId, apiKey]
+    "insert into user_api_keys (user_id, api_key) values ($1, $2) returning id, user_id, api_key, created_at",
+    [userId, apiKey]
   );
 
   return res.status(201).json({
-    item: { ...result.rows[0], group_name: group.name }
+    item: { ...result.rows[0], username: user.username }
   });
 }
 

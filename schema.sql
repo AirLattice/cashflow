@@ -80,6 +80,7 @@ create table if not exists transactions (
 create table if not exists websms_logs (
   id bigserial primary key,
   group_id bigint not null references groups(id),
+  asset_id bigint references assets(id),
   received_at timestamptz not null,
   text_length integer not null,
   text_preview text not null,
@@ -91,3 +92,10 @@ create table if not exists websms_logs (
 
 create index if not exists websms_logs_received_at_idx
   on websms_logs (received_at desc);
+
+create table if not exists user_api_keys (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade,
+  api_key text not null unique,
+  created_at timestamptz not null default now()
+);

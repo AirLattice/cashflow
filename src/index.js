@@ -23,11 +23,7 @@ import {
 } from "./routes/transactions.js";
 import { getSummary } from "./routes/summary.js";
 import { requireAuth } from "./middleware/auth.js";
-import {
-  getWebSmsApiKey,
-  isWebSmsFallbackKey,
-  requireWebSmsApiKey
-} from "./middleware/websmsAuth.js";
+import { requireWebSmsApiKey } from "./middleware/websmsAuth.js";
 import { requireAdmin, requirePermission } from "./middleware/permissions.js";
 import {
   listUsers,
@@ -157,8 +153,5 @@ async function ensureAdminSeed(attempt = 0) {
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
   console.log(`cashflow api listening on ${port}`);
-  if (isWebSmsFallbackKey()) {
-    console.log(`WEBSMS_API_KEY not set, using temporary key: ${getWebSmsApiKey()}`);
-  }
   ensureAdminSeed();
 });
