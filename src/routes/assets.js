@@ -129,24 +129,3 @@ export async function deleteAsset(req, res) {
 
   return res.json({ ok: true });
 }
-
-export async function updateAssetFilter(req, res) {
-  if (!req.user.group_id) {
-    return res.status(400).json({ error: "group not set" });
-  }
-  if (!Object.prototype.hasOwnProperty.call(req.body || {}, "filter_text")) {
-    return res.status(400).json({ error: "filter_text required" });
-  }
-
-  const result = await query(
-    "update assets set filter_text = $1 where id = $2 and group_id = $3 returning id, filter_text",
-    [req.body.filter_text?.trim() || null, req.params.id, req.user.group_id]
-  );
-
-  const item = result.rows[0];
-  if (!item) {
-    return res.status(404).json({ error: "not found" });
-  }
-
-  return res.json({ item });
-}

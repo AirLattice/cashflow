@@ -14,13 +14,7 @@ import {
   changePassword,
   deleteAccount
 } from "./routes/auth.js";
-import {
-  listAssets,
-  createAsset,
-  updateAsset,
-  deleteAsset,
-  updateAssetFilter
-} from "./routes/assets.js";
+import { listAssets, createAsset, updateAsset, deleteAsset } from "./routes/assets.js";
 import {
   listTransactions,
   createTransaction,
@@ -39,13 +33,7 @@ import {
   updateGroupStartDay,
   getGroupSummary
 } from "./routes/admin.js";
-import {
-  receiveWebSms,
-  listWebSmsLogs,
-  listUnmatchedWebSms,
-  resolveWebSmsLog,
-  ignoreWebSmsLog
-} from "./routes/websms.js";
+import { receiveWebSms, listWebSmsLogs, listUnmatchedWebSms } from "./routes/websms.js";
 import { query } from "./db.js";
 
 const app = express();
@@ -104,7 +92,6 @@ app.post("/auth/delete-account", requireAuth, deleteAccount);
 app.get("/assets", requireAuth, requirePermission("assets"), listAssets);
 app.post("/assets", requireAuth, requirePermission("assets"), createAsset);
 app.put("/assets/:id", requireAuth, requirePermission("assets"), updateAsset);
-app.put("/assets/:id/filter", requireAuth, requirePermission("assets"), updateAssetFilter);
 app.delete("/assets/:id", requireAuth, requirePermission("assets"), deleteAsset);
 
 app.get("/transactions", requireAuth, requirePermission("transactions"), listTransactions);
@@ -124,8 +111,6 @@ app.get("/admin/websms-logs", requireAuth, requireAdmin, listWebSmsLogs);
 
 app.post("/websms", requireWebSmsApiKey, receiveWebSms);
 app.get("/websms/unmatched", requireAuth, listUnmatchedWebSms);
-app.post("/websms/unmatched/:id/resolve", requireAuth, resolveWebSmsLog);
-app.post("/websms/unmatched/:id/ignore", requireAuth, ignoreWebSmsLog);
 
 async function ensureAdminSeed(attempt = 0) {
   try {
