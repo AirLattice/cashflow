@@ -28,7 +28,7 @@ body {
   font-family: "Manrope", "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--ink);
-  padding-top: 46px;
+  padding-top: var(--topbar-height, 46px);
   font-size: 14px;
 }
 

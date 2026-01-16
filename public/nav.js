@@ -72,6 +72,7 @@
   const changePasswordForm = document.getElementById("change-password-form");
   const deleteAccountForm = document.getElementById("delete-account-form");
   const logoutBtn = document.getElementById("logout-btn");
+  const topbar = root.querySelector(".topbar");
 
 
   function bindUserMenu() {
@@ -315,7 +316,18 @@
   } = {}) => {
     applyPermissions(permissions, role, isAuthenticated);
     bindUserMenu();
-    bindUserMenuToggles();
+  bindUserMenuToggles();
+
+  function syncTopbarHeight() {
+    if (!topbar) {
+      return;
+    }
+    const height = topbar.getBoundingClientRect().height;
+    document.documentElement.style.setProperty("--topbar-height", `${height}px`);
+  }
+
+  window.addEventListener("resize", syncTopbarHeight);
+  syncTopbarHeight();
     bindUserActions();
     if (userMenuBtn && username) {
       userMenuBtn.textContent = username;
