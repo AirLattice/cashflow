@@ -11,6 +11,7 @@
           <a class="ghost-link" href="/">홈</a>
           <a id="assets-top-link" class="ghost-link" href="/assets.html">자산</a>
           <a id="transactions-top-link" class="ghost-link" href="/transactions.html">입출금</a>
+          <a id="unmatched-top-link" class="ghost-link hidden" href="/websms-unmatched.html">미분류</a>
           <a id="admin-home-top-link" class="ghost-link hidden" href="/admin">관리자</a>
           <a id="websms-top-link" class="ghost-link hidden" href="/websms.html">WebSMS</a>
         </nav>
@@ -20,6 +21,7 @@
             <a class="ghost-link" href="/">홈</a>
             <a id="assets-mobile-link" class="ghost-link" href="/assets.html">자산</a>
             <a id="transactions-mobile-link" class="ghost-link" href="/transactions.html">입출금</a>
+            <a id="unmatched-mobile-link" class="ghost-link hidden" href="/websms-unmatched.html">미분류</a>
             <a id="admin-home-mobile-link" class="ghost-link hidden" href="/admin">관리자</a>
             <a id="websms-mobile-link" class="ghost-link hidden" href="/websms.html">WebSMS</a>
           </div>
@@ -247,6 +249,8 @@
     const assetsMobileLink = document.getElementById("assets-mobile-link");
     const transactionsTopLink = document.getElementById("transactions-top-link");
     const transactionsMobileLink = document.getElementById("transactions-mobile-link");
+    const unmatchedTopLink = document.getElementById("unmatched-top-link");
+    const unmatchedMobileLink = document.getElementById("unmatched-mobile-link");
     const adminHomeTopLink = document.getElementById("admin-home-top-link");
     const adminHomeMobileLink = document.getElementById("admin-home-mobile-link");
     const websmsTopLink = document.getElementById("websms-top-link");
@@ -258,6 +262,8 @@
       assetsMobileLink?.classList.add("hidden");
       transactionsTopLink?.classList.add("hidden");
       transactionsMobileLink?.classList.add("hidden");
+      unmatchedTopLink?.classList.add("hidden");
+      unmatchedMobileLink?.classList.add("hidden");
       adminHomeTopLink?.classList.add("hidden");
       adminHomeMobileLink?.classList.add("hidden");
       websmsTopLink?.classList.add("hidden");
@@ -275,6 +281,8 @@
     assetsMobileLink?.classList.toggle("hidden", !canAssets);
     transactionsTopLink?.classList.toggle("hidden", !canTransactions);
     transactionsMobileLink?.classList.toggle("hidden", !canTransactions);
+    unmatchedTopLink?.classList.toggle("hidden", !isAuthenticated);
+    unmatchedMobileLink?.classList.toggle("hidden", !isAuthenticated);
     adminHomeTopLink?.classList.toggle("hidden", !isAdmin);
     adminHomeMobileLink?.classList.toggle("hidden", !isAdmin);
     websmsTopLink?.classList.toggle("hidden", !isAdmin);

@@ -3,6 +3,27 @@ import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
 
 const WEB_SMS_LOG_LIMIT = 200;
 
+export async function listUnmatchedWebSms(req, res) {
+  if (!req.user.group_id) {
+    return res.status(400).json({ error: "group not set" });
+  }
+  const monthStartDay = await getMonthStartDay(req.user.group_id);
+  const period = getPeriodRange(monthStartDay);
+  if (!period) {
+    return res.status(400).json({ error: "invalid period" });
+  }
+
+  const result = await query(
+    `select id, received_at, text_preview, text
+     from websms_logs
+     where group_id = $1 and status = 'unmatched' and received_at >= $2 and received_at <= $3
+     order by received_at desc
+     limit $4`,
+    [req.user.group_id, period.start, period.end, WEB_SMS_LOG_LIMIT]
+  );
+  return res.json({ items: result.rows });
+}
+
 export async function listWebSmsLogs(req, res) {
   const requestedGroupId = req.query.group_id ? Number(req.query.group_id) : null;
   const groupId = requestedGroupId || req.user.group_id;

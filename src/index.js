@@ -33,7 +33,7 @@ import {
   updateGroupStartDay,
   getGroupSummary
 } from "./routes/admin.js";
-import { receiveWebSms, listWebSmsLogs } from "./routes/websms.js";
+import { receiveWebSms, listWebSmsLogs, listUnmatchedWebSms } from "./routes/websms.js";
 import { query } from "./db.js";
 
 const app = express();
@@ -110,6 +110,7 @@ app.get("/admin/group-summary", requireAuth, requireAdmin, getGroupSummary);
 app.get("/admin/websms-logs", requireAuth, requireAdmin, listWebSmsLogs);
 
 app.post("/websms", requireWebSmsApiKey, receiveWebSms);
+app.get("/websms/unmatched", requireAuth, listUnmatchedWebSms);
 
 async function ensureAdminSeed(attempt = 0) {
   try {
