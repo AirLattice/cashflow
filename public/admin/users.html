@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-    <title>WebSMS 로그</title>
+    <title>사용자 관리</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -22,38 +22,31 @@
     <main class="page-shell">
       <header class="page-header">
         <div>
-          <h1>WebSMS</h1>
-        </div>
-        <div class="inline">
-          <select id="websms-group-select"></select>
+          <h1>사용자 관리</h1>
         </div>
       </header>
 
-      <section id="websms-denied" class="panel hidden">
+      <section id="admin-denied" class="panel hidden">
         <h2>접근 불가</h2>
-        <p class="hint">관리자만 접근할 수 있습니다.</p>
+        <p class="subhead">관리자만 접근할 수 있습니다. 로그인 상태를 확인해주세요.</p>
       </section>
 
-      <section id="websms-panel" class="panel">
-        <p id="websms-status" class="hint">로딩 중...</p>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>수신시간</th>
-                <th>상태</th>
-                <th>내용</th>
-              </tr>
-            </thead>
-            <tbody id="websms-body"></tbody>
-          </table>
-          <p id="websms-empty" class="hint hidden">표시할 로그가 없습니다.</p>
+      <section id="admin-panel" class="panel">
+        <p id="admin-status" class="status">로딩 중...</p>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>사용자 목록</h2>
+          </div>
+          <div id="admin-users-table"></div>
         </div>
+
       </section>
     </main>
 
     <script src="/nav.js"></script>
-    <script src="/api.js"></script>
-    <script src="/websms.js"></script>
+    <script src="/api.js?v=2"></script>
+    <script src="/admin-common.js?v=2"></script>
+    <script src="/admin/users.js?v=2"></script>
   </body>
 </html>

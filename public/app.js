@@ -5,7 +5,6 @@ const authPanel = document.getElementById("auth-panel");
 const userMenuBtn = document.getElementById("user-menu-btn");
 const userMenuPanel = document.getElementById("user-menu-panel");
 const adminLink = document.getElementById("admin-link");
-const fixedManageLink = document.getElementById("fixed-manage-link");
 const summaryBtn = document.getElementById("summary-btn");
 const summaryMonth = document.getElementById("summary-month");
 const summaryIncome = document.getElementById("summary-income");
@@ -15,13 +14,8 @@ const incomeBar = document.getElementById("income-bar");
 const expenseBar = document.getElementById("expense-bar");
 const incomeBarValue = document.getElementById("income-bar-value");
 const expenseBarValue = document.getElementById("expense-bar-value");
-const assetsBody = document.getElementById("assets-body");
-const assetsEmpty = document.getElementById("assets-empty");
-const transactionsBody = document.getElementById("transactions-body");
-const transactionsEmpty = document.getElementById("transactions-empty");
 const tabs = document.querySelectorAll(".tab");
 const permissionSections = document.querySelectorAll(".permission-section");
-const noAccessPanel = document.getElementById("no-access");
 const mainLayout = document.querySelector("main.layout");
 
 const formatter = new Intl.NumberFormat("ko-KR");
@@ -58,16 +52,12 @@ function setLoggedIn(isLoggedIn, username, role) {
     userMenuBtn.classList.add("hidden");
     userMenuPanel.classList.add("hidden");
     currentActiveGroupId = null;
-    if (fixedManageLink) {
-      fixedManageLink.classList.add("hidden");
-    }
     if (mainLayout) {
       mainLayout.classList.add("hidden");
       mainLayout.style.display = "none";
     }
     document.body.classList.remove("is-authenticated");
     adminLink?.classList.add("hidden");
-    noAccessPanel.classList.add("hidden");
     if (typeof window.initNav === "function") {
       window.initNav({ isAuthenticated: false });
     }
@@ -92,18 +82,6 @@ function setLoggedIn(isLoggedIn, username, role) {
     if (expenseBarValue) {
       expenseBarValue.textContent = "-";
     }
-    if (assetsBody) {
-      assetsBody.innerHTML = "";
-    }
-    if (assetsEmpty) {
-      assetsEmpty.classList.add("hidden");
-    }
-    if (transactionsBody) {
-      transactionsBody.innerHTML = "";
-    }
-    if (transactionsEmpty) {
-      transactionsEmpty.classList.add("hidden");
-    }
   }
 }
 
@@ -112,10 +90,7 @@ function applyPermissions(permissions, role, isAuthenticated = true) {
   const isAdmin = role === "admin";
   currentPermissions = allowed;
   currentRole = role;
-  if (fixedManageLink) {
-    fixedManageLink.classList.toggle("hidden", !(isAdmin || allowed.assets));
-  }
-    if (typeof window.initNav === "function") {
+  if (typeof window.initNav === "function") {
     window.initNav({
       permissions: allowed,
       role,
@@ -124,20 +99,11 @@ function applyPermissions(permissions, role, isAuthenticated = true) {
       activeGroupId: currentActiveGroupId
     });
   }
-  let anyVisible = false;
   permissionSections.forEach((section) => {
     const key = section.dataset.permission;
     const isAllowed = isAdmin || Boolean(allowed[key]);
     section.classList.toggle("hidden", !isAllowed);
-    if (isAllowed) {
-      anyVisible = true;
-    }
   });
-  if (permissionSections.length === 0) {
-    noAccessPanel?.classList.add("hidden");
-  } else {
-    noAccessPanel?.classList.toggle("hidden", anyVisible);
-  }
 }
 
 function pad(value) {
@@ -168,18 +134,9 @@ function setDefaultMonthInputs(monthStartDay) {
 async function loadInitialData() {
   const isAdmin = currentRole === "admin";
   const canSummary = isAdmin || currentPermissions.summary;
-  const canAssets = isAdmin || currentPermissions.assets;
-  const canTransactions = isAdmin || currentPermissions.transactions;
-
   if (canSummary && summaryMonth) {
     await loadSummary();
     await loadChart();
-  }
-  if (canAssets) {
-    await loadAssets();
-  }
-  if (canTransactions && summaryMonth) {
-    await loadTransactions();
   }
 }
 
@@ -244,7 +201,6 @@ async function loadProfile() {
   } catch (err) {
     setLoggedIn(false);
     applyPermissions({}, null, false);
-    noAccessPanel.classList.add("hidden");
   }
 }
 
@@ -309,119 +265,10 @@ function formatDate(value) {
   return String(value).slice(0, 10);
 }
 
-function renderAssets(items) {
-  if (!assetsBody || !assetsEmpty) {
-    return;
-  }
-  if (!items.length) {
-    assetsBody.innerHTML = "";
-    assetsEmpty.classList.remove("hidden");
-    return;
-  }
-  assetsEmpty.classList.add("hidden");
-  const rows = items.map((item) => {
-    const balance = formatter.format(item.current_balance_cents || 0);
-    const typeLabel = {
-      cash: "현금",
-      account: "계좌",
-      card: "카드",
-      loan: "대출"
-    }[item.asset_type] || item.asset_type;
-    const numberLabel = item.asset_number || "번호 없음";
-    return `
-      <tr>
-        <td data-label="자산">
-          <div class="asset-line">
-            <span>${item.name}</span>
-            <span class="asset-dot">·</span>
-            <span>${typeLabel}</span>
-            <span class="asset-dot">·</span>
-            <span>${item.issuer}</span>
-            <span class="asset-dot">·</span>
-            <span>${numberLabel}</span>
-            <span class="asset-dot">·</span>
-            <span>${balance}원</span>
-          </div>
-        </td>
-      </tr>
-    `;
-  });
-  assetsBody.innerHTML = rows.join("");
-}
-
-async function loadAssets() {
-  try {
-    const data = await api("/assets");
-    renderAssets(data.items || []);
-  } catch (err) {
-    if (assetsEmpty) {
-      assetsEmpty.textContent = "자산 데이터를 불러오지 못했습니다.";
-      assetsEmpty.classList.remove("hidden");
-    }
-  }
-}
-
-function renderTransactions(items) {
-  if (!transactionsBody || !transactionsEmpty) {
-    return;
-  }
-  if (!items.length) {
-    transactionsBody.innerHTML = "";
-    transactionsEmpty.classList.remove("hidden");
-    return;
-  }
-  transactionsEmpty.classList.add("hidden");
-  const rows = items.slice(-8).map((item) => {
-    const date = new Date(item.occurred_at || item.created_at);
-    const dateLabel = Number.isNaN(date.getTime())
-      ? "-"
-      : date.toISOString().slice(0, 10);
-    const directionLabel = item.direction === "deposit" ? "입금" : "출금";
-    const amount = formatter.format(item.amount_cents || 0);
-    return `
-      <tr>
-        <td data-label="입출금">
-          <div class="asset-line">
-            <span>${dateLabel}</span>
-            <span class="asset-dot">·</span>
-            <span>${item.asset_name || "-"}</span>
-            <span class="asset-dot">·</span>
-            <span>${directionLabel}</span>
-            <span class="asset-dot">·</span>
-            <span>${amount}원</span>
-            <span class="asset-dot">·</span>
-            <span>${item.username || "-"}</span>
-          </div>
-        </td>
-      </tr>
-    `;
-  });
-  transactionsBody.innerHTML = rows.join("");
-}
-
-async function loadTransactions() {
-  if (!summaryMonth) {
-    return;
-  }
-  const month = summaryMonth.value || monthValue();
-  try {
-    const data = await api(`/transactions?month=${month}`);
-    renderTransactions(data.items || []);
-  } catch (err) {
-    if (transactionsEmpty) {
-      transactionsEmpty.textContent = "입출금 데이터를 불러오지 못했습니다.";
-      transactionsEmpty.classList.remove("hidden");
-    }
-  }
-}
-
-
 if (summaryBtn) {
   summaryBtn.addEventListener("click", async () => {
     await loadSummary();
     await loadChart();
-    await loadAssets();
-    await loadTransactions();
   });
 }
 loginForm.addEventListener("submit", handleLogin);

@@ -43,6 +43,12 @@ create table if not exists app_settings (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists group_settings (
+  group_id bigint primary key references groups(id) on delete cascade,
+  month_start_day integer not null default 1,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists assets (
   id bigserial primary key,
   group_id bigint not null references groups(id),

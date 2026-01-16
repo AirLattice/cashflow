@@ -23,7 +23,6 @@ import {
 } from "./routes/transactions.js";
 import { getSummary } from "./routes/summary.js";
 import { requireAuth } from "./middleware/auth.js";
-import { requireWebSmsApiKey } from "./middleware/websmsAuth.js";
 import { requireAdmin, requirePermission } from "./middleware/permissions.js";
 import {
   listUsers,
@@ -32,11 +31,9 @@ import {
   updateSettings,
   listGroups,
   createGroup,
-  listWebSmsKeys,
-  createWebSmsKey,
+  updateGroupStartDay,
   getGroupSummary
 } from "./routes/admin.js";
-import { receiveWebSms, listWebSmsLogs } from "./routes/websms.js";
 import { query } from "./db.js";
 
 const app = express();
@@ -107,14 +104,10 @@ app.get("/admin/users", requireAuth, requireAdmin, listUsers);
 app.put("/admin/users/:id/permissions", requireAuth, requireAdmin, updateUserPermissions);
 app.get("/admin/groups", requireAuth, requireAdmin, listGroups);
 app.post("/admin/groups", requireAuth, requireAdmin, createGroup);
+app.put("/admin/groups/:id/start-day", requireAuth, requireAdmin, updateGroupStartDay);
 app.get("/admin/group-summary", requireAuth, requireAdmin, getGroupSummary);
 app.get("/admin/settings", requireAuth, requireAdmin, getSettings);
 app.put("/admin/settings", requireAuth, requireAdmin, updateSettings);
-app.get("/admin/websms-keys", requireAuth, requireAdmin, listWebSmsKeys);
-app.post("/admin/websms-keys", requireAuth, requireAdmin, createWebSmsKey);
-app.get("/admin/websms-logs", requireAuth, requireAdmin, listWebSmsLogs);
-
-app.post("/websms", requireWebSmsApiKey, receiveWebSms);
 
 async function ensureAdminSeed(attempt = 0) {
   try {

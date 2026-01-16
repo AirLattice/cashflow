@@ -23,10 +23,20 @@ function formatDateInput(value) {
   return `${year}-${month}-${day}`;
 }
 
-function getDefaultRange() {
+function getDefaultRange(monthStartDay) {
+  const startDay = Number(monthStartDay) || 1;
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  let year = now.getFullYear();
+  let monthIndex = now.getMonth();
+  if (now.getDate() < startDay) {
+    monthIndex -= 1;
+    if (monthIndex < 0) {
+      monthIndex = 11;
+      year -= 1;
+    }
+  }
+  const start = new Date(year, monthIndex, startDay);
+  const end = new Date(year, monthIndex + 1, startDay - 1);
   return { start, end };
 }
 
@@ -243,7 +253,7 @@ async function init() {
       bindMoneyInputs(transactionForm);
     }
     if (filterStart && filterEnd) {
-      const range = getDefaultRange();
+      const range = getDefaultRange(me.month_start_day || 1);
       filterStart.value = formatDateInput(range.start);
       filterEnd.value = formatDateInput(range.end);
     }

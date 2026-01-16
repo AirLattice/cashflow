@@ -46,7 +46,7 @@ export async function listTransactions(req, res) {
     }
     range = { start, end };
   } else {
-    const monthStartDay = await getMonthStartDay();
+    const monthStartDay = await getMonthStartDay(req.user.group_id);
     const monthRange = getPeriodRange(monthStartDay, req.query.month);
     if (req.query.month && !monthRange) {
       return res.status(400).json({ error: "invalid month format, use YYYY-MM" });

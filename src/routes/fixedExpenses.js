@@ -12,7 +12,7 @@ export async function listFixedExpenses(req, res) {
       req.user.group_id
     ]);
   } else {
-    const monthStartDay = await getMonthStartDay();
+    const monthStartDay = await getMonthStartDay(req.user.group_id);
     const monthRange = getPeriodRange(monthStartDay, req.query.month);
     if (req.query.month && !monthRange) {
       return res.status(400).json({ error: "invalid month format, use YYYY-MM" });

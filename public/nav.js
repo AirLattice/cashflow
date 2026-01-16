@@ -11,8 +11,9 @@
           <a class="ghost-link" href="/">홈</a>
           <a id="assets-top-link" class="ghost-link" href="/assets.html">자산</a>
           <a id="transactions-top-link" class="ghost-link" href="/transactions.html">입출금</a>
-          <a id="admin-top-link" class="ghost-link hidden" href="/admin">관리자</a>
-          <a id="websms-top-link" class="ghost-link hidden" href="/websms.html">WebSMS</a>
+          <a id="admin-settings-top-link" class="ghost-link hidden" href="/admin">관리자 설정</a>
+          <a id="admin-users-top-link" class="ghost-link hidden" href="/admin/users.html">사용자관리</a>
+          <a id="admin-groups-top-link" class="ghost-link hidden" href="/admin/groups.html">그룹관리</a>
         </nav>
         <div class="topbar-mobile">
           <button id="nav-menu-btn" class="ghost" type="button">메뉴</button>
@@ -20,8 +21,9 @@
             <a class="ghost-link" href="/">홈</a>
             <a id="assets-mobile-link" class="ghost-link" href="/assets.html">자산</a>
             <a id="transactions-mobile-link" class="ghost-link" href="/transactions.html">입출금</a>
-            <a id="admin-mobile-link" class="ghost-link hidden" href="/admin">관리자</a>
-            <a id="websms-mobile-link" class="ghost-link hidden" href="/websms.html">WebSMS</a>
+            <a id="admin-settings-mobile-link" class="ghost-link hidden" href="/admin">관리자 설정</a>
+            <a id="admin-users-mobile-link" class="ghost-link hidden" href="/admin/users.html">사용자관리</a>
+            <a id="admin-groups-mobile-link" class="ghost-link hidden" href="/admin/groups.html">그룹관리</a>
           </div>
         </div>
         <p id="auth-status" class="status hidden"></p>
@@ -247,10 +249,12 @@
     const assetsMobileLink = document.getElementById("assets-mobile-link");
     const transactionsTopLink = document.getElementById("transactions-top-link");
     const transactionsMobileLink = document.getElementById("transactions-mobile-link");
-    const adminTopLink = document.getElementById("admin-top-link");
-    const adminMobileLink = document.getElementById("admin-mobile-link");
-    const websmsTopLink = document.getElementById("websms-top-link");
-    const websmsMobileLink = document.getElementById("websms-mobile-link");
+    const adminSettingsTopLink = document.getElementById("admin-settings-top-link");
+    const adminSettingsMobileLink = document.getElementById("admin-settings-mobile-link");
+    const adminUsersTopLink = document.getElementById("admin-users-top-link");
+    const adminUsersMobileLink = document.getElementById("admin-users-mobile-link");
+    const adminGroupsTopLink = document.getElementById("admin-groups-top-link");
+    const adminGroupsMobileLink = document.getElementById("admin-groups-mobile-link");
 
     if (!isAuthenticated) {
       groupSwitch?.classList.add("hidden");
@@ -258,10 +262,12 @@
       assetsMobileLink?.classList.add("hidden");
       transactionsTopLink?.classList.add("hidden");
       transactionsMobileLink?.classList.add("hidden");
-      adminTopLink?.classList.add("hidden");
-      adminMobileLink?.classList.add("hidden");
-      websmsTopLink?.classList.add("hidden");
-      websmsMobileLink?.classList.add("hidden");
+      adminSettingsTopLink?.classList.add("hidden");
+      adminSettingsMobileLink?.classList.add("hidden");
+      adminUsersTopLink?.classList.add("hidden");
+      adminUsersMobileLink?.classList.add("hidden");
+      adminGroupsTopLink?.classList.add("hidden");
+      adminGroupsMobileLink?.classList.add("hidden");
       navMenuPanel?.classList.add("hidden");
       userMenuPanel?.classList.add("hidden");
       userMenuBtn?.classList.add("hidden");
@@ -275,10 +281,12 @@
     assetsMobileLink?.classList.toggle("hidden", !canAssets);
     transactionsTopLink?.classList.toggle("hidden", !canTransactions);
     transactionsMobileLink?.classList.toggle("hidden", !canTransactions);
-    adminTopLink?.classList.toggle("hidden", !isAdmin);
-    adminMobileLink?.classList.toggle("hidden", !isAdmin);
-    websmsTopLink?.classList.toggle("hidden", !isAdmin);
-    websmsMobileLink?.classList.toggle("hidden", !isAdmin);
+    adminSettingsTopLink?.classList.toggle("hidden", !isAdmin);
+    adminSettingsMobileLink?.classList.toggle("hidden", !isAdmin);
+    adminUsersTopLink?.classList.toggle("hidden", !isAdmin);
+    adminUsersMobileLink?.classList.toggle("hidden", !isAdmin);
+    adminGroupsTopLink?.classList.toggle("hidden", !isAdmin);
+    adminGroupsMobileLink?.classList.toggle("hidden", !isAdmin);
     userMenuBtn?.classList.remove("hidden");
     groupSwitch?.classList.remove("hidden");
   }

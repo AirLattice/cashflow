@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { query } from "../db.js";
+import { getClient, query } from "../db.js";
 import { getMonthStartDay } from "../utils/period.js";
 
 function signAccessToken(userId) {
@@ -64,31 +64,44 @@ export async function register(req, res) {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const client = await getClient();
   try {
-    const groupResult = await query(
+    await client.query("begin");
+    const groupResult = await client.query(
       "select id from groups where name = 'family' limit 1"
     );
     const groupId = groupResult.rows[0]?.id;
     if (!groupId) {
-      return res.status(500).json({ error: "group not initialized" });
+      throw new Error("group not initialized");
     }
-    const result = await query(
+    const result = await client.query(
       "insert into users (username, password_hash, role, active_group_id) values ($1, $2, 'user', $3) returning id",
       [username, passwordHash, groupId]
     );
-    await query("insert into user_permissions (user_id) values ($1)", [
-      result.rows[0].id
-    ]);
-    await query(
+    const userId = result.rows[0].id;
+    await client.query("insert into user_permissions (user_id) values ($1)", [userId]);
+    await client.query(
       "insert into user_group_access (user_id, group_id) values ($1, $2) on conflict do nothing",
-      [result.rows[0].id, groupId]
+      [userId, groupId]
     );
-    return res.status(201).json({ id: result.rows[0].id, username });
+    const apiKey = crypto.randomBytes(24).toString("base64url");
+    await client.query("insert into user_api_keys (user_id, api_key) values ($1, $2)", [
+      userId,
+      apiKey
+    ]);
+    await client.query("commit");
+    return res.status(201).json({ id: userId, username, api_key: apiKey });
   } catch (err) {
+    await client.query("rollback").catch(() => {});
     if (err.code === "23505") {
       return res.status(409).json({ error: "username already exists" });
     }
+    if (err.message === "group not initialized") {
+      return res.status(500).json({ error: "group not initialized" });
+    }
     return res.status(500).json({ error: "failed to register" });
+  } finally {
+    client.release();
   }
 }
 
@@ -191,7 +204,7 @@ export async function me(req, res) {
   if (!user) {
     return res.status(404).json({ error: "user not found" });
   }
-  const monthStartDay = await getMonthStartDay();
+  const monthStartDay = await getMonthStartDay(user.active_group_id);
   return res.json({
     id: user.id,
     username: user.username,
@@ -199,9 +212,9 @@ export async function me(req, res) {
     active_group_id: user.active_group_id,
     group_name: user.group_name,
     permissions: {
-      assets: Boolean(user.can_view_assets),
-      transactions: Boolean(user.can_view_transactions),
-      summary: Boolean(user.can_view_summary)
+      assets: true,
+      transactions: true,
+      summary: true
     },
     month_start_day: monthStartDay
   });

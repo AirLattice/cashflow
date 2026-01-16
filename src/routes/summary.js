@@ -5,7 +5,7 @@ export async function getSummary(req, res) {
   if (!req.user.group_id) {
     return res.status(400).json({ error: "group not set" });
   }
-  const monthStartDay = await getMonthStartDay();
+  const monthStartDay = await getMonthStartDay(req.user.group_id);
   const monthRange = getPeriodRange(monthStartDay, req.query.month);
   if (req.query.month && !monthRange) {
     return res.status(400).json({ error: "invalid month format, use YYYY-MM" });
