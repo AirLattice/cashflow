@@ -42,8 +42,8 @@
 - revoked_at (timestamptz)
 - created_at (timestamptz, default now)
 
-### app_settings
-- id (integer, PK, default row id=1)
+### group_settings
+- group_id (bigint, PK, FK -> groups.id)
 - month_start_day (integer, NOT NULL, default 1)
 - updated_at (timestamptz, default now)
 
@@ -81,6 +81,7 @@
 - groups 1:N incomes
 - users 1:N fixed_expenses
 - users 1:N incomes
+- groups 1:1 group_settings
 
 ## 관계 다이어그램 (ASCII)
 ```
@@ -88,7 +89,7 @@ users ──┬──────────────< refresh_tokens
         ├─────────────── user_permissions
         ├──────────────< fixed_expenses >────────── groups
         ├──────────────< incomes       >────────── groups
-        └──< user_group_access >─────── groups
+        └──< user_group_access >─────── groups ─── group_settings
 ```
 
 ## 참고

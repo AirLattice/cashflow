@@ -27,8 +27,6 @@ import { requireAdmin, requirePermission } from "./middleware/permissions.js";
 import {
   listUsers,
   updateUserPermissions,
-  getSettings,
-  updateSettings,
   listGroups,
   createGroup,
   updateGroupStartDay,
@@ -74,9 +72,6 @@ app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
 
-app.get("/admin", (req, res) => {
-  res.redirect("/admin.html");
-});
 
 app.post("/auth/register", register);
 app.post("/auth/login", login);
@@ -106,8 +101,6 @@ app.get("/admin/groups", requireAuth, requireAdmin, listGroups);
 app.post("/admin/groups", requireAuth, requireAdmin, createGroup);
 app.put("/admin/groups/:id/start-day", requireAuth, requireAdmin, updateGroupStartDay);
 app.get("/admin/group-summary", requireAuth, requireAdmin, getGroupSummary);
-app.get("/admin/settings", requireAuth, requireAdmin, getSettings);
-app.put("/admin/settings", requireAuth, requireAdmin, updateSettings);
 
 async function ensureAdminSeed(attempt = 0) {
   try {

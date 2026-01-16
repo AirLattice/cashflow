@@ -37,12 +37,6 @@ create table if not exists user_permissions (
   created_at timestamptz not null default now()
 );
 
-create table if not exists app_settings (
-  id integer primary key,
-  month_start_day integer not null default 1,
-  updated_at timestamptz not null default now()
-);
-
 create table if not exists group_settings (
   group_id bigint primary key references groups(id) on delete cascade,
   month_start_day integer not null default 1,

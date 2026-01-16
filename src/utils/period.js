@@ -1,25 +1,8 @@
 import { query } from "../db.js";
 
-async function getGlobalMonthStartDay() {
-  const fallback = 1;
-  const result = await query("select month_start_day from app_settings where id = 1");
-  if (result.rows.length === 0) {
-    await query(
-      "insert into app_settings (id, month_start_day) values (1, $1) on conflict do nothing",
-      [fallback]
-    );
-    return fallback;
-  }
-  const value = Number(result.rows[0].month_start_day || fallback);
-  if (Number.isNaN(value) || value < 1 || value > 28) {
-    return fallback;
-  }
-  return value;
-}
-
 export async function getMonthStartDay(groupId = null) {
   try {
-    const fallback = await getGlobalMonthStartDay();
+    const fallback = 1;
     if (!groupId) {
       return fallback;
     }

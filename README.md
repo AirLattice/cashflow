@@ -27,8 +27,6 @@ Admin page: http://localhost:8081/admin.html
 Admin:
 - GET /admin/users
 - PUT /admin/users/:id/permissions { "role": "admin|user", "can_view_fixed_expenses": true, "can_view_incomes": true, "can_view_summary": true }
-- GET /admin/settings
-- PUT /admin/settings { "month_start_day": 15 }
 
 Cookies:
 - access_token (1 hour)
@@ -48,7 +46,7 @@ Permissions:
 - Admin must grant permissions via the admin page.
 
 Month 기준:
-- `month_start_day` 값을 기준으로 월 집계 기간을 계산합니다.
+- 월 집계 기간은 활성 그룹의 `month_start_day` 값을 기준으로 계산합니다.
 - 예: 15로 설정하면 15일~다음달 14일이 한 달입니다.
 
 ## Migration (existing DB)
