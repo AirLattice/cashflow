@@ -1,18 +1,34 @@
-import crypto from "crypto";
-
 const fallbackKey = "websms_temp_1f4c9b7e0d2a4b7e9c1f";
 const websmsApiKey = process.env.WEBSMS_API_KEY || fallbackKey;
 
-function isValidKey(candidate) {
-  if (!candidate) {
-    return false;
+import { query } from "../db.js";
+
+async function resolveGroupByKey(token) {
+  if (!token) {
+    return null;
   }
-  const candidateBuf = Buffer.from(candidate);
-  const keyBuf = Buffer.from(websmsApiKey);
-  if (candidateBuf.length !== keyBuf.length) {
-    return false;
+  const result = await query(
+    "select group_id from websms_api_keys where api_key = $1 limit 1",
+    [token]
+  );
+  if (result.rows[0]?.group_id) {
+    return result.rows[0].group_id;
   }
-  return crypto.timingSafeEqual(candidateBuf, keyBuf);
+  if (token === websmsApiKey) {
+    const groupResult = await query(
+      "select id from groups where name = 'family' limit 1"
+    );
+    const groupId = groupResult.rows[0]?.id;
+    if (!groupId) {
+      return null;
+    }
+    await query(
+      "insert into websms_api_keys (group_id, api_key) values ($1, $2) on conflict do nothing",
+      [groupId, token]
+    );
+    return groupId;
+  }
+  return null;
 }
 
 export function requireWebSmsApiKey(req, res, next) {
@@ -24,11 +40,15 @@ export function requireWebSmsApiKey(req, res, next) {
     token = authHeader.slice(7).trim();
   }
 
-  if (!isValidKey(token)) {
-    return res.status(401).json({ error: "invalid api key" });
-  }
-
-  return next();
+  return resolveGroupByKey(token)
+    .then((groupId) => {
+      if (!groupId) {
+        return res.status(401).json({ error: "invalid api key" });
+      }
+      req.websmsGroupId = groupId;
+      return next();
+    })
+    .catch(() => res.status(500).json({ error: "failed to authorize" }));
 }
 
 export function getWebSmsApiKey() {

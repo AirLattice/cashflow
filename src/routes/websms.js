@@ -1,3 +1,27 @@
+import { query } from "../db.js";
+
+const WEB_SMS_LOG_LIMIT = 200;
+
+export async function listWebSmsLogs(req, res) {
+  const requestedGroupId = req.query.group_id ? Number(req.query.group_id) : null;
+  if (requestedGroupId && req.user.role === "admin") {
+    const result = await query(
+      "select id, received_at, text_length, text_preview, text from websms_logs where group_id = $1 order by received_at desc limit $2",
+      [requestedGroupId, WEB_SMS_LOG_LIMIT]
+    );
+    return res.json({ items: result.rows });
+  }
+
+  if (!req.user.group_id) {
+    return res.json({ items: [] });
+  }
+  const result = await query(
+    "select id, received_at, text_length, text_preview, text from websms_logs where group_id = $1 order by received_at desc limit $2",
+    [req.user.group_id, WEB_SMS_LOG_LIMIT]
+  );
+  return res.json({ items: result.rows });
+}
+
 export async function receiveWebSms(req, res) {
   const { text } = req.body;
   const receivedAt = new Date().toISOString();
@@ -15,6 +39,11 @@ export async function receiveWebSms(req, res) {
       text_length: content.length,
       text_preview: preview
     })
+  );
+
+  await query(
+    "insert into websms_logs (group_id, received_at, text_length, text_preview, text) values ($1, $2, $3, $4, $5) on conflict do nothing",
+    [req.websmsGroupId, receivedAt, content.length, preview, content]
   );
 
   return res.json({

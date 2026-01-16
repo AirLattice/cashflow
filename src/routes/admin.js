@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { query } from "../db.js";
 import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
 
@@ -131,6 +132,35 @@ export async function updateSettings(req, res) {
     [value]
   );
   return res.json({ ok: true, month_start_day: value });
+}
+
+export async function listWebSmsKeys(req, res) {
+  const result = await query(
+    "select k.id, k.group_id, g.name as group_name, k.api_key, k.created_at from websms_api_keys k join groups g on k.group_id = g.id order by g.name asc, k.created_at desc"
+  );
+  return res.json({ items: result.rows });
+}
+
+export async function createWebSmsKey(req, res) {
+  const groupId = Number(req.body.group_id);
+  if (!groupId) {
+    return res.status(400).json({ error: "group_id is required" });
+  }
+  const groupResult = await query("select id, name from groups where id = $1", [groupId]);
+  const group = groupResult.rows[0];
+  if (!group) {
+    return res.status(404).json({ error: "group not found" });
+  }
+
+  const apiKey = crypto.randomBytes(24).toString("base64url");
+  const result = await query(
+    "insert into websms_api_keys (group_id, api_key) values ($1, $2) returning id, group_id, api_key, created_at",
+    [groupId, apiKey]
+  );
+
+  return res.status(201).json({
+    item: { ...result.rows[0], group_name: group.name }
+  });
 }
 
 export async function getGroupSummary(req, res) {

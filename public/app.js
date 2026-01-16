@@ -343,13 +343,22 @@ function renderAssets(items) {
       card: "카드",
       loan: "대출"
     }[item.asset_type] || item.asset_type;
+    const numberLabel = item.asset_number || "번호 없음";
     return `
       <tr>
-        <td data-label="자산명">${item.name}</td>
-        <td data-label="구분">${typeLabel}</td>
-        <td data-label="발행기관">${item.issuer}</td>
-        <td data-label="자산번호">${item.asset_number || "-"}</td>
-        <td data-label="잔액">${balance}원</td>
+        <td data-label="자산">
+          <div class="asset-line">
+            <span>${item.name}</span>
+            <span class="asset-dot">·</span>
+            <span>${typeLabel}</span>
+            <span class="asset-dot">·</span>
+            <span>${item.issuer}</span>
+            <span class="asset-dot">·</span>
+            <span>${numberLabel}</span>
+            <span class="asset-dot">·</span>
+            <span>${balance}원</span>
+          </div>
+        </td>
       </tr>
     `;
   });
@@ -387,11 +396,19 @@ function renderTransactions(items) {
     const amount = formatter.format(item.amount_cents || 0);
     return `
       <tr>
-        <td data-label="일시">${dateLabel}</td>
-        <td data-label="자산">${item.asset_name || "-"}</td>
-        <td data-label="구분">${directionLabel}</td>
-        <td data-label="금액">${amount}원</td>
-        <td data-label="작성자">${item.username || "-"}</td>
+        <td data-label="입출금">
+          <div class="asset-line">
+            <span>${dateLabel}</span>
+            <span class="asset-dot">·</span>
+            <span>${item.asset_name || "-"}</span>
+            <span class="asset-dot">·</span>
+            <span>${directionLabel}</span>
+            <span class="asset-dot">·</span>
+            <span>${amount}원</span>
+            <span class="asset-dot">·</span>
+            <span>${item.username || "-"}</span>
+          </div>
+        </td>
       </tr>
     `;
   });

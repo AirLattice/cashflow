@@ -36,9 +36,11 @@ import {
   updateSettings,
   listGroups,
   createGroup,
+  listWebSmsKeys,
+  createWebSmsKey,
   getGroupSummary
 } from "./routes/admin.js";
-import { receiveWebSms } from "./routes/websms.js";
+import { receiveWebSms, listWebSmsLogs } from "./routes/websms.js";
 import { query } from "./db.js";
 
 const app = express();
@@ -112,6 +114,9 @@ app.post("/admin/groups", requireAuth, requireAdmin, createGroup);
 app.get("/admin/group-summary", requireAuth, requireAdmin, getGroupSummary);
 app.get("/admin/settings", requireAuth, requireAdmin, getSettings);
 app.put("/admin/settings", requireAuth, requireAdmin, updateSettings);
+app.get("/admin/websms-keys", requireAuth, requireAdmin, listWebSmsKeys);
+app.post("/admin/websms-keys", requireAuth, requireAdmin, createWebSmsKey);
+app.get("/admin/websms-logs", requireAuth, requireAdmin, listWebSmsLogs);
 
 app.post("/websms", requireWebSmsApiKey, receiveWebSms);
 

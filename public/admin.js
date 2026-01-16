@@ -6,6 +6,10 @@ const adminPanel = document.getElementById("admin-panel");
 const deniedPanel = document.getElementById("admin-denied");
 const groupForm = document.getElementById("group-form");
 const groupNameInput = document.getElementById("group-name");
+const websmsForm = document.getElementById("websms-form");
+const websmsGroupSelect = document.getElementById("websms-group-select");
+const websmsKeysBody = document.getElementById("websms-keys-body");
+const websmsKeysEmpty = document.getElementById("websms-keys-empty");
 let groupOptions = [];
 
 async function api(path, options = {}) {
@@ -119,6 +123,43 @@ async function loadGroups() {
   try {
     const data = await api("/admin/groups");
     groupOptions = data.groups || [];
+    if (websmsGroupSelect) {
+      websmsGroupSelect.innerHTML = groupOptions
+        .map((group) => `<option value="${group.id}">${group.name}</option>`)
+        .join("");
+    }
+  } catch (err) {
+    setStatus(err.message);
+  }
+}
+
+function renderWebSmsKeys(items) {
+  if (!websmsKeysBody || !websmsKeysEmpty) {
+    return;
+  }
+  if (!items.length) {
+    websmsKeysBody.innerHTML = "";
+    websmsKeysEmpty.classList.remove("hidden");
+    return;
+  }
+  websmsKeysEmpty.classList.add("hidden");
+  const rows = items.map((item) => {
+    const created = item.created_at ? item.created_at.replace("T", " ").replace("Z", "") : "-";
+    return `
+      <tr>
+        <td data-label="그룹">${item.group_name || "-"}</td>
+        <td data-label="API 키">${item.api_key}</td>
+        <td data-label="생성일">${created}</td>
+      </tr>
+    `;
+  });
+  websmsKeysBody.innerHTML = rows.join("");
+}
+
+async function loadWebSmsKeys() {
+  try {
+    const data = await api("/admin/websms-keys");
+    renderWebSmsKeys(data.items || []);
   } catch (err) {
     setStatus(err.message);
   }
@@ -152,6 +193,7 @@ async function init() {
     showAdmin();
     await loadGroups();
     await loadSettings();
+    await loadWebSmsKeys();
     await loadUsers();
   } catch (err) {
     showDenied(err.message);
@@ -243,7 +285,27 @@ groupForm.addEventListener("submit", async (event) => {
     setStatus("그룹이 추가되었습니다.");
     groupNameInput.value = "";
     await loadGroups();
+    await loadWebSmsKeys();
     await loadUsers();
+  } catch (err) {
+    setStatus(err.message);
+  }
+});
+
+websmsForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const groupId = Number(websmsGroupSelect.value);
+  if (!groupId) {
+    setStatus("그룹을 선택해주세요.");
+    return;
+  }
+  try {
+    await api("/admin/websms-keys", {
+      method: "POST",
+      body: JSON.stringify({ group_id: groupId })
+    });
+    setStatus("WebSMS 키가 생성되었습니다.");
+    await loadWebSmsKeys();
   } catch (err) {
     setStatus(err.message);
   }

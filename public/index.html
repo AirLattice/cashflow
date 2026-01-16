@@ -19,13 +19,7 @@
     <div class="bg"></div>
     <div id="topbar-root" data-user-menu="true"></div>
     <header class="hero">
-      <div class="requires-auth">
-        <p class="eyebrow">가계 자금 흐름</p>
-        <h1>월별 자금 흐름</h1>
-        <p class="subhead">
-          고정 지출과 수입을 월별로 정리하고, 수입이 지출을 감당하는지 확인하세요.
-        </p>
-      </div>
+      <div class="requires-auth"></div>
       <div class="hero-card" id="auth-panel">
         <div class="auth-tabs">
           <button class="tab active" data-tab="login">로그인</button>
@@ -115,11 +109,7 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>자산명</th>
-                <th>구분</th>
-                <th>발행기관</th>
-                <th>자산번호</th>
-                <th>잔액</th>
+                <th>자산 요약</th>
               </tr>
             </thead>
             <tbody id="assets-body"></tbody>
@@ -141,11 +131,7 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>일시</th>
-                <th>자산</th>
-                <th>구분</th>
-                <th>금액</th>
-                <th>작성자</th>
+                <th>입출금 요약</th>
               </tr>
             </thead>
             <tbody id="transactions-body"></tbody>

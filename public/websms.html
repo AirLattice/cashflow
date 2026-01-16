@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>WebSMS 로그</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div id="topbar-root"></div>
+
+    <main class="page-shell">
+      <header class="page-header">
+        <div>
+          <h1>WebSMS</h1>
+        </div>
+        <div class="inline">
+          <select id="websms-group-select"></select>
+        </div>
+      </header>
+
+      <section id="websms-denied" class="panel hidden">
+        <h2>접근 불가</h2>
+        <p class="hint">관리자만 접근할 수 있습니다.</p>
+      </section>
+
+      <section id="websms-panel" class="panel">
+        <p id="websms-status" class="hint">로딩 중...</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>수신시간</th>
+                <th>내용</th>
+              </tr>
+            </thead>
+            <tbody id="websms-body"></tbody>
+          </table>
+          <p id="websms-empty" class="hint hidden">표시할 로그가 없습니다.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/nav.js"></script>
+    <script src="/api.js"></script>
+    <script src="/websms.js"></script>
+  </body>
+</html>
