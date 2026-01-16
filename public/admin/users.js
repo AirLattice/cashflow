@@ -193,6 +193,11 @@ tableEl?.addEventListener("click", (event) => {
   if (!menu) {
     return;
   }
+  document.querySelectorAll("[data-group-menu]").forEach((other) => {
+    if (other !== menu) {
+      other.classList.add("hidden");
+    }
+  });
   menu.classList.toggle("hidden");
 });
 
