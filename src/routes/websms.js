@@ -1,6 +1,5 @@
 import { getClient, query } from "../db.js";
 import { getMonthStartDay, getPeriodRange } from "../utils/period.js";
-import { parseWebSms } from "../services/websmsParser.js";
 
 const WEB_SMS_LOG_LIMIT = 200;
 
@@ -47,37 +46,32 @@ export async function receiveWebSms(req, res) {
     })
   );
 
-  const parsed = parseWebSms(content);
+  const parsed = parseGenericSms(content);
   let status = "unmatched";
   let assetId = null;
   let userId = null;
   let amount = null;
   let direction = null;
   let assetType = null;
+  let resolvedGroupId = null;
 
-  if (parsed?.issuer && req.websmsUserId) {
+  if (req.websmsUserId) {
     const assetsResult = await query(
-      "select a.id, a.group_id, a.asset_number, a.asset_type from assets a join user_group_access uga on uga.group_id = a.group_id where uga.user_id = $1 and a.issuer = $2 order by a.id asc",
-      [req.websmsUserId, parsed.issuer]
+      "select a.id, a.group_id, a.asset_type, a.filter_text from assets a join user_group_access uga on uga.group_id = a.group_id where uga.user_id = $1 and a.filter_text is not null and a.filter_text <> '' order by a.id asc",
+      [req.websmsUserId]
     );
     const assets = assetsResult.rows;
-    if (parsed.card_last4) {
-      const match = assets.find((asset) => asset.asset_number === parsed.card_last4);
-      if (match) {
-        assetId = match.id;
-        assetType = match.asset_type;
-        req.websmsGroupId = match.group_id;
-      }
-    } else if (assets.length === 1) {
-      assetId = assets[0].id;
-      assetType = assets[0].asset_type;
-      req.websmsGroupId = assets[0].group_id;
+    const matches = assets.filter((asset) => matchesFilter(content, asset.filter_text));
+    if (matches.length === 1) {
+      assetId = matches[0].id;
+      assetType = matches[0].asset_type;
+      resolvedGroupId = matches[0].group_id;
     }
   }
 
-  if (assetId && Number.isFinite(parsed?.amount_cents)) {
+  if (assetId && Number.isFinite(parsed?.amount_cents) && parsed?.direction) {
     amount = Math.abs(parsed.amount_cents);
-    direction = parsed.status === "cancel" ? "deposit" : "withdraw";
+    direction = parsed.direction;
   }
 
   if (assetId && amount !== null) {
@@ -92,7 +86,7 @@ export async function receiveWebSms(req, res) {
   try {
     await client.query("begin");
 
-    let logGroupId = req.websmsGroupId;
+    let logGroupId = resolvedGroupId || req.websmsGroupId;
     if (!logGroupId && req.websmsUserId) {
       const groupResult = await query(
         "select group_id from user_group_access where user_id = $1 order by created_at asc limit 1",
@@ -112,8 +106,7 @@ export async function receiveWebSms(req, res) {
     if (status === "processed") {
       const delta = direction === "deposit" ? amount : -amount;
       const principal = assetType === "card" || assetType === "loan" ? amount : null;
-      const installments =
-        assetType === "card" || assetType === "loan" ? parsed.installments || 1 : null;
+      const installments = assetType === "card" || assetType === "loan" ? 1 : null;
       const rate = assetType === "card" || assetType === "loan" ? 0 : null;
 
       await client.query(
@@ -151,4 +144,34 @@ export async function receiveWebSms(req, res) {
     received_at: receivedAt,
     text
   });
+}
+
+function matchesFilter(text, filterText) {
+  if (!filterText) {
+    return false;
+  }
+  const tokens = String(filterText)
+    .split(",")
+    .map((token) => token.trim())
+    .filter(Boolean);
+  if (!tokens.length) {
+    return false;
+  }
+  return tokens.every((token) => text.includes(token));
+}
+
+function parseGenericSms(text) {
+  const amountMatch = String(text).match(/(-?[\d,]+)원/);
+  const amount = amountMatch ? Number(amountMatch[1].replace(/,/g, "")) : null;
+  const normalized = String(text);
+  let direction = null;
+  if (normalized.includes("취소") || normalized.includes("입금")) {
+    direction = "deposit";
+  } else if (normalized.includes("출금") || normalized.includes("승인")) {
+    direction = "withdraw";
+  }
+  return {
+    amount_cents: Number.isNaN(amount) ? null : Math.abs(amount || 0),
+    direction
+  };
 }

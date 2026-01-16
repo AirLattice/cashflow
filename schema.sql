@@ -50,6 +50,7 @@ create table if not exists assets (
   issuer text not null,
   asset_number text,
   asset_type text not null,
+  filter_text text,
   current_balance_cents integer not null default 0,
   created_at timestamptz not null default now(),
   unique (group_id, name),

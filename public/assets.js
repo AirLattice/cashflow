@@ -45,12 +45,14 @@ function renderAssets(items) {
       loan: "대출"
     }[item.asset_type] || item.asset_type;
     const balance = formatter.format(item.current_balance_cents || 0);
+    const filterText = item.filter_text ? item.filter_text : "-";
     return `
       <tr data-id="${item.id}">
         <td data-label="자산명">${item.name}</td>
         <td data-label="구분">${typeLabel}</td>
         <td data-label="발행기관">${item.issuer}</td>
         <td data-label="자산번호">${item.asset_number || "-"}</td>
+        <td data-label="필터">${filterText}</td>
         <td data-label="잔액">${balance}원</td>
         <td><button class="ghost" data-action="delete">삭제</button></td>
       </tr>
@@ -98,6 +100,7 @@ assetForm.addEventListener("submit", async (event) => {
     name: data.name?.trim(),
     issuer: data.issuer?.trim(),
     asset_number: data.asset_number?.trim() || null,
+    filter_text: data.filter_text?.trim() || null,
     asset_type: data.asset_type,
     current_balance_cents: toNumber(data.current_balance_cents)
   };

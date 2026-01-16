@@ -22,7 +22,8 @@ export async function createAsset(req, res) {
     issuer,
     asset_number,
     asset_type,
-    current_balance_cents
+    current_balance_cents,
+    filter_text
   } = req.body;
 
   if (!name || !issuer || !asset_type) {
@@ -40,8 +41,16 @@ export async function createAsset(req, res) {
   }
 
   const result = await query(
-    "insert into assets (group_id, name, issuer, asset_number, asset_type, current_balance_cents) values ($1, $2, $3, $4, $5, $6) returning *",
-    [req.user.group_id, name, issuer, asset_number || null, asset_type, balance]
+    "insert into assets (group_id, name, issuer, asset_number, asset_type, filter_text, current_balance_cents) values ($1, $2, $3, $4, $5, $6, $7) returning *",
+    [
+      req.user.group_id,
+      name,
+      issuer,
+      asset_number || null,
+      asset_type,
+      filter_text?.trim() || null,
+      balance
+    ]
   );
 
   return res.status(201).json({ item: result.rows[0] });
@@ -56,7 +65,8 @@ export async function updateAsset(req, res) {
     issuer,
     asset_number,
     asset_type,
-    current_balance_cents
+    current_balance_cents,
+    filter_text
   } = req.body;
 
   if (!name || !issuer || !asset_type) {
@@ -74,8 +84,17 @@ export async function updateAsset(req, res) {
   }
 
   const result = await query(
-    "update assets set name = $1, issuer = $2, asset_number = $3, asset_type = $4, current_balance_cents = $5 where id = $6 and group_id = $7 returning *",
-    [name, issuer, asset_number || null, asset_type, balance, req.params.id, req.user.group_id]
+    "update assets set name = $1, issuer = $2, asset_number = $3, asset_type = $4, filter_text = $5, current_balance_cents = $6 where id = $7 and group_id = $8 returning *",
+    [
+      name,
+      issuer,
+      asset_number || null,
+      asset_type,
+      filter_text?.trim() || null,
+      balance,
+      req.params.id,
+      req.user.group_id
+    ]
   );
 
   const item = result.rows[0];
