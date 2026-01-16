@@ -24,6 +24,24 @@ export async function listUnmatchedWebSms(req, res) {
   return res.json({ items: result.rows });
 }
 
+export async function ignoreUnmatchedWebSms(req, res) {
+  if (!req.user.group_id) {
+    return res.status(400).json({ error: "group not set" });
+  }
+  const logId = Number(req.params.id);
+  if (!logId) {
+    return res.status(400).json({ error: "invalid log id" });
+  }
+  const result = await query(
+    "delete from websms_logs where id = $1 and group_id = $2 and status = 'unmatched' returning id",
+    [logId, req.user.group_id]
+  );
+  if (!result.rowCount) {
+    return res.status(404).json({ error: "not found" });
+  }
+  return res.json({ ok: true });
+}
+
 export async function listWebSmsLogs(req, res) {
   const requestedGroupId = req.query.group_id ? Number(req.query.group_id) : null;
   const groupId = requestedGroupId || req.user.group_id;

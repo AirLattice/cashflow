@@ -2,6 +2,7 @@ const statusEl = document.getElementById("assets-status");
 const assetsBody = document.getElementById("assets-body");
 const assetsEmpty = document.getElementById("assets-empty");
 const assetForm = document.getElementById("asset-form");
+const assetFormToggle = document.getElementById("asset-form-toggle");
 
 const formatter = new Intl.NumberFormat("ko-KR");
 const { parseMoney, bindMoneyInputs } = window.FormUtils || {};
@@ -88,6 +89,13 @@ async function loadAssets() {
   }
 }
 
+function setAssetFormOpen(isOpen) {
+  assetForm.classList.toggle("hidden", !isOpen);
+  if (assetFormToggle) {
+    assetFormToggle.textContent = isOpen ? "추가 닫기" : "자산 추가";
+  }
+}
+
 assetsBody.addEventListener("click", async (event) => {
   const toggleButton = event.target.closest("button[data-action='toggle']");
   if (toggleButton) {
@@ -153,6 +161,7 @@ assetForm.addEventListener("submit", async (event) => {
     });
     setStatus("자산이 추가되었습니다.");
     assetForm.reset();
+    setAssetFormOpen(false);
     await loadAssets();
   } catch (err) {
     setStatus(err.message);
@@ -178,6 +187,16 @@ async function init() {
     }
     if (typeof bindMoneyInputs === "function") {
       bindMoneyInputs(assetForm);
+    }
+    if (assetFormToggle) {
+      setAssetFormOpen(!assetForm.classList.contains("hidden"));
+      assetFormToggle.addEventListener("click", () => {
+        const shouldOpen = assetForm.classList.contains("hidden");
+        setAssetFormOpen(shouldOpen);
+        if (shouldOpen) {
+          assetForm.querySelector("input[name='name']")?.focus();
+        }
+      });
     }
     await loadAssets();
   } catch (err) {

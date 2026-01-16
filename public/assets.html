@@ -20,15 +20,18 @@
     <div id="topbar-root"></div>
 
     <main class="page-shell">
-      <header class="page-header">
-        <div>
+      <header class="page-header page-header-actions">
+        <div class="page-title">
           <h1>자산</h1>
+        </div>
+        <div class="page-actions">
+          <button id="asset-form-toggle" class="ghost" type="button">자산 추가</button>
         </div>
       </header>
 
       <section class="panel">
         <p id="assets-status" class="hint">로딩 중...</p>
-        <form id="asset-form" class="form grid">
+        <form id="asset-form" class="form grid hidden">
           <label>
             자산명
             <input type="text" name="name" required />

@@ -328,6 +328,19 @@ button.ghost {
   text-align: right;
 }
 
+.page-header-actions {
+  text-align: left;
+}
+
+.page-header-actions > div:first-child {
+  margin-left: 0;
+  text-align: left;
+}
+
+.page-actions {
+  margin-left: auto;
+}
+
 .admin-header {
   text-align: left;
 }

@@ -36,6 +36,7 @@ function renderLogs(items) {
         <td data-label="수신시간">${received}</td>
         <td data-label="내용">${item.text_preview || "-"}</td>
         <td><button class="ghost" data-action="select">선택</button></td>
+        <td><button class="ghost" data-action="ignore">삭제</button></td>
       </tr>
     `;
   });
@@ -58,18 +59,45 @@ async function loadLogs() {
 
 bodyEl.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-action='select']");
-  if (!button) {
+  if (button) {
+    const row = button.closest("tr");
+    if (!row) {
+      return;
+    }
+    const text = decodeURIComponent(row.dataset.text || "");
+    updatePreview(text);
+    bodyEl.querySelectorAll("tr").forEach((entry) => {
+      entry.classList.toggle("selected", entry === row);
+    });
     return;
   }
-  const row = button.closest("tr");
+
+  const ignoreButton = event.target.closest("button[data-action='ignore']");
+  if (!ignoreButton) {
+    return;
+  }
+  const row = ignoreButton.closest("tr");
   if (!row) {
     return;
   }
-  const text = decodeURIComponent(row.dataset.text || "");
-  updatePreview(text);
-  bodyEl.querySelectorAll("tr").forEach((entry) => {
-    entry.classList.toggle("selected", entry === row);
-  });
+  const logId = Number(row.dataset.id);
+  if (!logId) {
+    return;
+  }
+  if (!window.confirm("이 미분류 메시지를 삭제 처리할까요?")) {
+    return;
+  }
+  api(`/websms/unmatched/${logId}/ignore`, { method: "POST" })
+    .then(() => {
+      setStatus("미분류 메시지가 삭제 처리되었습니다.");
+      if (row.classList.contains("selected")) {
+        updatePreview("");
+      }
+      return loadLogs();
+    })
+    .catch((err) => {
+      setStatus(err.message);
+    });
 });
 
 async function init() {
