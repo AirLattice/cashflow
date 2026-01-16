@@ -31,6 +31,9 @@ export async function createAsset(req, res) {
   if (!ASSET_TYPES.has(asset_type)) {
     return res.status(400).json({ error: "invalid asset_type" });
   }
+  if (asset_type !== "cash" && !asset_number) {
+    return res.status(400).json({ error: "asset_number is required" });
+  }
   const balance = Number(current_balance_cents);
   if (!Number.isFinite(balance)) {
     return res.status(400).json({ error: "invalid current_balance_cents" });
@@ -61,6 +64,9 @@ export async function updateAsset(req, res) {
   }
   if (!ASSET_TYPES.has(asset_type)) {
     return res.status(400).json({ error: "invalid asset_type" });
+  }
+  if (asset_type !== "cash" && !asset_number) {
+    return res.status(400).json({ error: "asset_number is required" });
   }
   const balance = Number(current_balance_cents);
   if (!Number.isFinite(balance)) {

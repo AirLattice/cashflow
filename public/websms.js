@@ -26,9 +26,11 @@ function renderRows(items) {
   emptyEl.classList.add("hidden");
   const rows = items.map((item) => {
     const received = item.received_at ? item.received_at.replace("T", " ").replace("Z", "") : "-";
+    const statusLabel = item.status === "processed" ? "정상" : "미분류";
     return `
       <tr>
         <td data-label="수신시간">${received}</td>
+        <td data-label="상태">${statusLabel}</td>
         <td data-label="내용">${item.text_preview || "-"}</td>
       </tr>
     `;

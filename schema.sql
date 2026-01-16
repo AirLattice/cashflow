@@ -52,11 +52,14 @@ create table if not exists assets (
   asset_type text not null,
   current_balance_cents integer not null default 0,
   created_at timestamptz not null default now(),
-  unique (group_id, name)
+  unique (group_id, name),
+  constraint assets_asset_number_required check (
+    asset_type = 'cash' or asset_number is not null
+  )
 );
 
-create unique index if not exists assets_group_asset_number_key
-  on assets (group_id, asset_number)
+create unique index if not exists assets_asset_number_unique
+  on assets (issuer, asset_number)
   where asset_number is not null;
 
 create table if not exists transactions (
@@ -81,6 +84,7 @@ create table if not exists websms_logs (
   text_length integer not null,
   text_preview text not null,
   text text,
+  status text not null default 'unmatched',
   created_at timestamptz not null default now(),
   unique (group_id, received_at, text_length, text_preview)
 );

@@ -6,7 +6,7 @@ export async function listWebSmsLogs(req, res) {
   const requestedGroupId = req.query.group_id ? Number(req.query.group_id) : null;
   if (requestedGroupId && req.user.role === "admin") {
     const result = await query(
-      "select id, received_at, text_length, text_preview, text from websms_logs where group_id = $1 order by received_at desc limit $2",
+      "select id, received_at, text_length, text_preview, text, status from websms_logs where group_id = $1 order by received_at desc limit $2",
       [requestedGroupId, WEB_SMS_LOG_LIMIT]
     );
     return res.json({ items: result.rows });
@@ -16,7 +16,7 @@ export async function listWebSmsLogs(req, res) {
     return res.json({ items: [] });
   }
   const result = await query(
-    "select id, received_at, text_length, text_preview, text from websms_logs where group_id = $1 order by received_at desc limit $2",
+    "select id, received_at, text_length, text_preview, text, status from websms_logs where group_id = $1 order by received_at desc limit $2",
     [req.user.group_id, WEB_SMS_LOG_LIMIT]
   );
   return res.json({ items: result.rows });
@@ -42,7 +42,7 @@ export async function receiveWebSms(req, res) {
   );
 
   await query(
-    "insert into websms_logs (group_id, received_at, text_length, text_preview, text) values ($1, $2, $3, $4, $5) on conflict do nothing",
+    "insert into websms_logs (group_id, received_at, text_length, text_preview, text, status) values ($1, $2, $3, $4, $5, 'unmatched') on conflict do nothing",
     [req.websmsGroupId, receivedAt, content.length, preview, content]
   );
 
