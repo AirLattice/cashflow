@@ -20,7 +20,8 @@ body {
   font-family: "Manrope", "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--ink);
-  padding-top: 58px;
+  padding-top: 46px;
+  font-size: 14px;
 }
 
 .bg {
@@ -48,16 +49,16 @@ body {
 .topbar-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 12px 6vw;
+  padding: 8px 4vw;
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
 }
 
 .topbar-nav {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -97,11 +98,11 @@ body {
   width: min(360px, 90vw);
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 10px;
   box-shadow: var(--shadow);
-  padding: 16px;
+  padding: 12px;
   display: grid;
-  gap: 16px;
+  gap: 12px;
   z-index: 20;
 }
 
@@ -110,9 +111,9 @@ body {
 }
 
 .hero {
-  padding: 48px 6vw 32px;
+  padding: 32px 4vw 24px;
   display: grid;
-  gap: 32px;
+  gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   align-items: center;
 }
@@ -120,28 +121,28 @@ body {
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  font-size: 12px;
+  font-size: 10px;
   font-family: "Space Mono", monospace;
   color: var(--muted);
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 h1 {
-  font-size: clamp(2.5rem, 4vw, 4.2rem);
-  margin: 0 0 12px;
+  font-size: clamp(2rem, 3.2vw, 3.4rem);
+  margin: 0 0 10px;
 }
 
 .subhead {
-  font-size: 1.1rem;
-  max-width: 520px;
+  font-size: 0.95rem;
+  max-width: 460px;
   color: var(--muted);
 }
 
 .hero-card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 24px;
-  padding: 24px;
+  border-radius: 12px;
+  padding: 16px;
   box-shadow: var(--shadow);
 }
 
@@ -149,14 +150,14 @@ h1 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   background: #eef2f8;
-  border-radius: 18px;
+  border-radius: 10px;
   border: 1px solid var(--line);
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .tab {
-  padding: 10px 16px;
+  padding: 8px 12px;
   border: none;
   background: transparent;
   font-weight: 600;
@@ -171,20 +172,21 @@ h1 {
 
 .form {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .form.grid {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
   align-items: end;
+  justify-content: start;
 }
 
 .fixed-create-form {
   width: 100%;
   max-width: 100%;
-  margin-top: 16px;
-  padding: 16px;
-  border-radius: 20px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 11px;
   border: 1px solid var(--line);
   background: #ffffff;
   overflow: hidden;
@@ -192,14 +194,14 @@ h1 {
 
 label {
   display: grid;
-  gap: 6px;
-  font-size: 0.9rem;
+  gap: 4px;
+  font-size: 0.85rem;
   color: var(--muted);
 }
 
 .input-highlight {
-  padding: 12px;
-  border-radius: 16px;
+  padding: 10px;
+  border-radius: 8px;
   border: 1px solid rgba(59, 130, 246, 0.25);
   background: rgba(59, 130, 246, 0.08);
   color: var(--ink);
@@ -219,22 +221,33 @@ button {
 
 input,
 select {
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 6px 7px;
+  border-radius: 7px;
   border: 1px solid var(--line);
   background: #ffffff;
   color: var(--ink);
 }
 
 button {
-  padding: 12px 18px;
-  border-radius: 999px;
+  padding: 4px 14px;
+  border-radius: 5px;
   border: none;
   background: var(--accent);
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: fit-content;
+}
+
+.form button {
+  width: fit-content;
+  justify-self: start;
+}
+
+.form input,
+.form select {
+  width: min(220px, 100%);
 }
 
 button:hover {
@@ -249,15 +262,15 @@ button.ghost {
 }
 
 .auth-actions {
-  margin-top: 12px;
+  margin-top: 10px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .ghost-link {
-  padding: 10px 18px;
-  border-radius: 999px;
+  padding: 8px 12px;
+  border-radius: 16px;
   text-decoration: none;
   font-weight: 600;
   background: transparent;
@@ -267,27 +280,27 @@ button.ghost {
 
 .status {
   display: none;
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .page-shell {
-  padding: 48px 6vw 64px;
+  padding: 32px 4vw 40px;
   display: grid;
-  gap: 24px;
+  gap: 16px;
 }
 
 .page-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
 }
 
 .page-header h1 {
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: clamp(1.6rem, 2.6vw, 2.5rem);
   margin: 0;
 }
 
@@ -299,8 +312,8 @@ button.ghost {
 
 .layout {
   display: none;
-  gap: 24px;
-  padding: 0 6vw 64px;
+  gap: 16px;
+  padding: 0 4vw 40px;
 }
 
 .is-authenticated .layout {
@@ -309,19 +322,19 @@ button.ghost {
 
 .panel {
   background: var(--card);
-  border-radius: 24px;
+  border-radius: 12px;
   border: 1px solid var(--line);
-  padding: 24px;
+  padding: 16px;
   box-shadow: var(--shadow);
 }
 
 .panel-head {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .panel h2 {
@@ -336,24 +349,24 @@ button.ghost {
 
 .summary-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
 .chart {
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 
 .bar-group {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .bar-track {
-  height: 18px;
+  height: 12px;
   background: #eef2f8;
-  border-radius: 999px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--line);
 }
@@ -361,7 +374,7 @@ button.ghost {
 .bar {
   height: 100%;
   width: 0%;
-  border-radius: 999px;
+  border-radius: 12px;
   transition: width 0.4s ease;
 }
 
@@ -384,8 +397,8 @@ button.ghost {
 }
 
 .summary-item {
-  padding: 16px;
-  border-radius: 16px;
+  padding: 12px;
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: #f8faff;
 }
@@ -397,20 +410,20 @@ button.ghost {
 }
 
 .summary-item strong {
-  font-size: 1.4rem;
+  font-size: 1.15rem;
 }
 
 .flow-meter {
-  margin-top: 18px;
+  margin-top: 12px;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .meter-row {
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .meter-row strong {
@@ -419,8 +432,8 @@ button.ghost {
 
 .list {
   display: grid;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .table-wrap {
@@ -436,10 +449,10 @@ button.ghost {
 
 .data-table th,
 .data-table td {
-  padding: 12px 14px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--line);
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .data-table th {
@@ -455,22 +468,22 @@ button.ghost {
 .card-row {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr auto;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
-  padding: 12px 16px;
-  border-radius: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
   border: 1px solid var(--line);
   background: #ffffff;
 }
 
 .admin-row {
-  grid-template-columns: 1fr 1.3fr 1fr 1.4fr;
+  grid-template-columns: 1fr 1.3fr 1fr;
 }
 
 .admin-identity {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -482,7 +495,7 @@ button.ghost {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .admin-group span {
@@ -499,8 +512,8 @@ button.ghost {
 
 .inline-field {
   display: grid;
-  gap: 6px;
-  font-size: 0.85rem;
+  gap: 4px;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 
@@ -512,7 +525,7 @@ button.ghost {
 .amount-split {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .amount-split small {
@@ -527,17 +540,17 @@ button.ghost {
 
 .row-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 
 .list-controls {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .list-controls .inline-field {
@@ -550,36 +563,21 @@ button.ghost {
 }
 
 .list-controls button {
-  padding: 8px 14px;
-  font-size: 0.9rem;
+  padding: 3px 10px;
+  font-size: 0.85rem;
 }
 
 .admin-controls {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
 }
 
-.admin-summary {
-  display: grid;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: var(--muted);
+.admin-controls button {
+  width: auto;
 }
 
-.admin-summary strong {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.summary-line {
-  margin-top: 2px;
-}
-
-.muted {
-  color: var(--muted);
-}
 
 .card-row small {
   color: var(--muted);
@@ -628,18 +626,18 @@ button.ghost {
   }
 
   .data-table tr {
-    padding: 12px;
-    border-radius: 16px;
+    padding: 10px;
+    border-radius: 10px;
     border: 1px solid var(--line);
     background: var(--card);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .data-table td {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
-    padding: 8px 0;
+    gap: 8px;
+    padding: 6px 0;
     border: none;
   }
 
@@ -659,6 +657,10 @@ button.ghost {
   }
 
   button {
-    width: 100%;
+    width: auto;
+  }
+
+  .form button {
+    justify-self: start;
   }
 }

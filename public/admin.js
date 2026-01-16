@@ -7,7 +7,6 @@ const deniedPanel = document.getElementById("admin-denied");
 const groupForm = document.getElementById("group-form");
 const groupNameInput = document.getElementById("group-name");
 let groupOptions = [];
-const formatter = new Intl.NumberFormat("ko-KR");
 
 async function api(path, options = {}) {
   const request = window.ApiClient?.request;
@@ -88,9 +87,6 @@ function renderUsers(users) {
           </select>
           <button class="ghost" data-action="save">저장</button>
         </div>
-        <div class="admin-summary" data-summary>
-          <p class="muted">그룹을 선택하면 요약이 표시됩니다.</p>
-        </div>
       </div>
     `;
     })
@@ -103,95 +99,7 @@ function renderUsers(users) {
     if (select && user && user.group_id) {
       select.value = String(user.group_id);
     }
-    if (select && select.value) {
-      updateSummaryRow(row);
-    }
   });
-}
-
-function getRowPermissions(row) {
-  const role = row.querySelector("select[data-role]")?.value;
-  if (role === "admin") {
-    return { assets: true, transactions: true, summary: true };
-  }
-  return {
-    assets: row.querySelector("input[data-perm='assets']")?.checked,
-    transactions: row.querySelector("input[data-perm='transactions']")?.checked,
-    summary: row.querySelector("input[data-perm='summary']")?.checked
-  };
-}
-
-function applySummary(row, data) {
-  const summaryEl = row.querySelector("[data-summary]");
-  if (!summaryEl) {
-    return;
-  }
-  const perms = getRowPermissions(row);
-  const periodLabel = data?.period?.label || "-";
-  const startDay = data?.period?.start_day || 1;
-
-  const assetsBlock = perms.assets
-    ? `
-      <div>
-        <strong>자산</strong>
-        <div class="summary-line">개수: ${data.assets?.count ?? 0}개</div>
-        <div class="summary-line">잔액 합계: ${formatter.format(
-          data.assets?.balance_cents ?? 0
-        )}원</div>
-      </div>
-    `
-    : `<div><strong>자산</strong><div class="summary-line">권한 없음</div></div>`;
-
-  const txBlock = perms.transactions
-    ? `
-      <div>
-        <strong>입출금</strong>
-        <div class="summary-line">건수: ${data.transactions?.count ?? 0}건</div>
-        <div class="summary-line">입금: ${formatter.format(
-          data.transactions?.deposits_cents ?? 0
-        )}원</div>
-        <div class="summary-line">출금: ${formatter.format(
-          data.transactions?.withdrawals_cents ?? 0
-        )}원</div>
-      </div>
-    `
-    : `<div><strong>입출금</strong><div class="summary-line">권한 없음</div></div>`;
-
-  const summaryBlock = perms.summary
-    ? `
-      <div>
-        <strong>요약</strong>
-        <div class="summary-line">${periodLabel} (${startDay}일 기준)</div>
-        <div class="summary-line">순합계: ${formatter.format(
-          data.transactions?.net_cents ?? 0
-        )}원</div>
-      </div>
-    `
-    : `<div><strong>요약</strong><div class="summary-line">권한 없음</div></div>`;
-
-  summaryEl.innerHTML = `${assetsBlock}${txBlock}${summaryBlock}`;
-}
-
-async function updateSummaryRow(row) {
-  const userId = row.dataset.userId;
-  const groupId = Number(row.querySelector("select[data-group-id]")?.value);
-  if (!groupId) {
-    const summaryEl = row.querySelector("[data-summary]");
-    if (summaryEl) {
-      summaryEl.innerHTML = "<p class=\"muted\">그룹을 선택하세요.</p>";
-    }
-    return;
-  }
-  try {
-    const data = await api(`/admin/group-summary?user_id=${userId}&group_id=${groupId}`);
-    row._summaryData = data;
-    applySummary(row, data);
-  } catch (err) {
-    const summaryEl = row.querySelector("[data-summary]");
-    if (summaryEl) {
-      summaryEl.innerHTML = `<p class="muted">${err.message}</p>`;
-    }
-  }
 }
 
 async function loadUsers() {
@@ -273,7 +181,6 @@ tableEl.addEventListener("click", async (event) => {
       body: JSON.stringify({ role, group_id: groupId, ...perms })
     });
     setStatus("저장 완료");
-    await updateSummaryRow(row);
   } catch (err) {
     setStatus(err.message);
   }
@@ -281,15 +188,6 @@ tableEl.addEventListener("click", async (event) => {
 
 tableEl.addEventListener("change", async (event) => {
   const select = event.target.closest("select[data-group-id]");
-  const permToggle = event.target.closest("input[data-perm]");
-  const roleSelect = event.target.closest("select[data-role]");
-  if ((permToggle || roleSelect) && !select) {
-    const row = event.target.closest(".admin-row");
-    if (row && row._summaryData) {
-      applySummary(row, row._summaryData);
-    }
-    return;
-  }
   if (!select) {
     return;
   }
@@ -311,7 +209,6 @@ tableEl.addEventListener("change", async (event) => {
       body: JSON.stringify({ role, group_id: groupId, ...perms })
     });
     setStatus("데이터 그룹이 변경되었습니다.");
-    await updateSummaryRow(row);
   } catch (err) {
     setStatus(err.message);
   }
