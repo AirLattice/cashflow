@@ -25,7 +25,6 @@ const noAccessPanel = document.getElementById("no-access");
 const mainLayout = document.querySelector("main.layout");
 
 const formatter = new Intl.NumberFormat("ko-KR");
-let refreshInFlight = null;
 let currentPermissions = {};
 let currentRole = null;
 let currentUsername = "";
@@ -192,26 +191,11 @@ function setTab(name) {
 
 async function api(path, options = {}) {
   const requestWithRefresh = window.ApiClient?.requestWithRefresh;
+  const refreshSession = window.ApiClient?.refreshSession;
   if (!requestWithRefresh) {
     throw new Error("API client not available");
   }
   return requestWithRefresh(path, options, refreshSession, () => setLoggedIn(false));
-}
-
-async function refreshSession() {
-  if (!refreshInFlight) {
-    refreshInFlight = fetch("/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include"
-    }).finally(() => {
-      refreshInFlight = null;
-    });
-  }
-  const response = await refreshInFlight;
-  if (!response.ok) {
-    throw new Error("refresh failed");
-  }
 }
 
 async function handleLogin(event) {

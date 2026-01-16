@@ -8,31 +8,15 @@ const deleteSelectedBtn = document.getElementById("fixed-delete-selected");
 
 const formatter = new Intl.NumberFormat("ko-KR");
 const { parseMoney, formatMoney, bindMoneyInputs } = window.FormUtils || {};
-let refreshInFlight = null;
 const itemsById = new Map();
 
 function setStatus(message) {
   statusEl.textContent = message;
 }
 
-async function refreshSession() {
-  if (!refreshInFlight) {
-    refreshInFlight = fetch("/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include"
-    }).finally(() => {
-      refreshInFlight = null;
-    });
-  }
-  const response = await refreshInFlight;
-  if (!response.ok) {
-    throw new Error("refresh failed");
-  }
-}
-
 async function api(path, options = {}) {
   const requestWithRefresh = window.ApiClient?.requestWithRefresh;
+  const refreshSession = window.ApiClient?.refreshSession;
   if (!requestWithRefresh) {
     throw new Error("API client not available");
   }

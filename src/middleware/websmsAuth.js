@@ -4,6 +4,11 @@ const websmsApiKey = process.env.WEBSMS_API_KEY || fallbackKey;
 import { query } from "../db.js";
 
 async function resolveGroupByKey(token) {
+  const now = Date.now();
+  const cached = keyCache.get(token);
+  if (cached && cached.expiresAt > now) {
+    return cached.groupId;
+  }
   if (!token) {
     return null;
   }
@@ -12,6 +17,7 @@ async function resolveGroupByKey(token) {
     [token]
   );
   if (result.rows[0]?.group_id) {
+    keyCache.set(token, { groupId: result.rows[0].group_id, expiresAt: now + CACHE_TTL_MS });
     return result.rows[0].group_id;
   }
   if (token === websmsApiKey) {
@@ -26,10 +32,14 @@ async function resolveGroupByKey(token) {
       "insert into websms_api_keys (group_id, api_key) values ($1, $2) on conflict do nothing",
       [groupId, token]
     );
+    keyCache.set(token, { groupId, expiresAt: now + CACHE_TTL_MS });
     return groupId;
   }
   return null;
 }
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const keyCache = new Map();
 
 export function requireWebSmsApiKey(req, res, next) {
   const headerKey = req.get("x-api-key");

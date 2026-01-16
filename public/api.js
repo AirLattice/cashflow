@@ -1,4 +1,22 @@
 (() => {
+  let refreshInFlight = null;
+
+  async function refreshSession() {
+    if (!refreshInFlight) {
+      refreshInFlight = fetch("/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      }).finally(() => {
+        refreshInFlight = null;
+      });
+    }
+    const response = await refreshInFlight;
+    if (!response.ok) {
+      throw new Error("refresh failed");
+    }
+  }
+
   async function request(path, options = {}) {
     const response = await fetch(path, {
       ...options,
@@ -31,9 +49,10 @@
       return await request(path, options);
     } catch (err) {
       if (err.message === "missing access token") {
-        if (refreshFn) {
+        const refreshHandler = refreshFn || refreshSession;
+        if (refreshHandler) {
           try {
-            await refreshFn();
+            await refreshHandler();
             return request(path, { ...options, _retried: true });
           } catch (refreshErr) {
             if (onAuthFail) {
@@ -48,6 +67,7 @@
 
   window.ApiClient = {
     request,
-    requestWithRefresh
+    requestWithRefresh,
+    refreshSession
   };
 })();

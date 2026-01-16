@@ -10,8 +10,6 @@ const toggleFormBtn = document.getElementById("toggle-transaction-form");
 
 const formatter = new Intl.NumberFormat("ko-KR");
 const { parseMoney, bindMoneyInputs } = window.FormUtils || {};
-
-let refreshInFlight = null;
 const assetTypeById = new Map();
 
 function pad(value) {
@@ -34,28 +32,13 @@ function getDefaultRange() {
 
 async function api(path, options = {}) {
   const requestWithRefresh = window.ApiClient?.requestWithRefresh;
+  const refreshSession = window.ApiClient?.refreshSession;
   if (!requestWithRefresh) {
     throw new Error("API client not available");
   }
   return requestWithRefresh(path, options, refreshSession, () => {
     throw new Error("로그인이 필요합니다.");
   });
-}
-
-async function refreshSession() {
-  if (!refreshInFlight) {
-    refreshInFlight = fetch("/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include"
-    }).finally(() => {
-      refreshInFlight = null;
-    });
-  }
-  const response = await refreshInFlight;
-  if (!response.ok) {
-    throw new Error("refresh failed");
-  }
 }
 
 function setStatus(message) {

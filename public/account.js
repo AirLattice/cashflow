@@ -5,8 +5,6 @@ const changePasswordForm = document.getElementById("change-password-form");
 const deleteAccountForm = document.getElementById("delete-account-form");
 const accountUser = document.getElementById("account-user");
 
-let refreshInFlight = null;
-
 function setStatus(message) {
   authStatus.textContent = message;
 }
@@ -30,24 +28,9 @@ function setLoggedIn(isLoggedIn, username) {
   }
 }
 
-async function refreshSession() {
-  if (!refreshInFlight) {
-    refreshInFlight = fetch("/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include"
-    }).finally(() => {
-      refreshInFlight = null;
-    });
-  }
-  const response = await refreshInFlight;
-  if (!response.ok) {
-    throw new Error("refresh failed");
-  }
-}
-
 async function api(path, options = {}) {
   const requestWithRefresh = window.ApiClient?.requestWithRefresh;
+  const refreshSession = window.ApiClient?.refreshSession;
   if (!requestWithRefresh) {
     throw new Error("API client not available");
   }
