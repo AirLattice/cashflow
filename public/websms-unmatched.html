@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-    <title>미분류 메시지</title>
+    <title>미분류 처리</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -22,7 +22,7 @@
     <main class="page-shell">
       <header class="page-header">
         <div>
-          <h1>미분류 메시지</h1>
+          <h1>미분류 처리</h1>
         </div>
       </header>
 
@@ -34,6 +34,7 @@
               <tr>
                 <th>수신시간</th>
                 <th>내용</th>
+                <th></th>
                 <th></th>
               </tr>
             </thead>
@@ -49,10 +50,80 @@
         </div>
         <pre id="unmatched-preview" class="mono-block">메시지를 선택해주세요.</pre>
       </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>기존 자산에 필터 추가</h2>
+        </div>
+        <form id="filter-form" class="form inline">
+          <label>
+            자산 선택
+            <select id="filter-asset-select"></select>
+          </label>
+          <label>
+            필터 텍스트
+            <input
+              type="text"
+              id="filter-text"
+              placeholder="콤마로 구분, 모두 포함되어야 매칭"
+            />
+          </label>
+          <button type="submit">필터 추가 후 분류</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>새 자산 등록</h2>
+        </div>
+        <form id="create-form" class="form grid">
+          <label>
+            자산명
+            <input type="text" name="name" required />
+          </label>
+          <label>
+            자산 구분
+            <select name="asset_type" required>
+              <option value="cash">현금</option>
+              <option value="account">계좌</option>
+              <option value="card">카드</option>
+              <option value="loan">대출</option>
+            </select>
+          </label>
+          <label>
+            발행기관
+            <input type="text" name="issuer" required />
+          </label>
+          <label>
+            자산번호
+            <input type="text" name="asset_number" placeholder="없으면 비워두세요" />
+          </label>
+          <label>
+            WebSMS 필터
+            <input
+              type="text"
+              name="filter_text"
+              placeholder="콤마로 구분, 모두 포함되어야 매칭"
+            />
+          </label>
+          <label>
+            현재 잔액 (원)
+            <input
+              type="text"
+              name="current_balance_cents"
+              inputmode="numeric"
+              data-money="true"
+              required
+            />
+          </label>
+          <button type="submit">자산 추가 후 분류</button>
+        </form>
+      </section>
     </main>
 
     <script src="/nav.js"></script>
     <script src="/api.js"></script>
+    <script src="/form-utils.js"></script>
     <script src="/websms-unmatched.js"></script>
   </body>
 </html>
