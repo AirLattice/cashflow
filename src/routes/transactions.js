@@ -71,7 +71,7 @@ export async function listTransactions(req, res) {
     params.push(assetId);
     sql += ` and t.asset_id = $${params.length} `;
   }
-  sql += " order by t.occurred_at asc, t.id asc";
+  sql += " order by t.occurred_at desc, t.id desc";
 
   const result = await query(sql, params);
   return res.json({ items: result.rows });
