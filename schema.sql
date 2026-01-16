@@ -62,6 +62,9 @@ create unique index if not exists assets_asset_number_unique
   on assets (issuer, asset_number)
   where asset_number is not null;
 
+create index if not exists assets_group_id_idx
+  on assets (group_id);
+
 create table if not exists transactions (
   id bigserial primary key,
   group_id bigint not null references groups(id),
@@ -76,6 +79,9 @@ create table if not exists transactions (
   occurred_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
+
+create index if not exists transactions_group_occurred_idx
+  on transactions (group_id, occurred_at desc);
 
 create table if not exists websms_logs (
   id bigserial primary key,
@@ -93,9 +99,15 @@ create table if not exists websms_logs (
 create index if not exists websms_logs_received_at_idx
   on websms_logs (received_at desc);
 
+create index if not exists websms_logs_group_received_idx
+  on websms_logs (group_id, received_at desc);
+
 create table if not exists user_api_keys (
   id bigserial primary key,
   user_id bigint not null references users(id) on delete cascade,
   api_key text not null unique,
   created_at timestamptz not null default now()
 );
+
+create index if not exists user_group_access_user_created_idx
+  on user_group_access (user_id, created_at);

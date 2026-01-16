@@ -23,6 +23,8 @@ let currentPermissions = {};
 let currentRole = null;
 let currentUsername = "";
 let currentActiveGroupId = null;
+let summaryCacheKey = null;
+let summaryCachePromise = null;
 
 function setStatus(message) {
   if (authStatus) {
@@ -211,14 +213,8 @@ function monthValue(date = new Date()) {
 }
 
 async function loadSummary() {
-  if (!summaryMonth) {
-    return;
-  }
-  if (!summaryMonth.value) {
-    summaryMonth.value = monthValue();
-  }
   try {
-    const data = await api(`/summary?month=${summaryMonth.value}`);
+    const data = await fetchSummaryData();
     if (summaryIncome) {
       summaryIncome.textContent = formatter.format(data.total_income_cents);
     }
@@ -234,9 +230,8 @@ async function loadSummary() {
 }
 
 async function loadChart() {
-  const month = summaryMonth?.value || monthValue();
   try {
-    const data = await api(`/summary?month=${month}`);
+    const data = await fetchSummaryData();
     const income = Number(data.total_income_cents || 0);
     const expense = Number(data.total_fixed_expense_cents || 0);
     const maxValue = Math.max(income, expense, 1);
@@ -256,6 +251,28 @@ async function loadChart() {
   } catch (err) {
     setStatus(err.message);
   }
+}
+
+async function fetchSummaryData() {
+  if (!summaryMonth) {
+    throw new Error("summary month unavailable");
+  }
+  if (!summaryMonth.value) {
+    summaryMonth.value = monthValue();
+  }
+  const month = summaryMonth.value;
+  if (summaryCacheKey === month && summaryCachePromise) {
+    return summaryCachePromise;
+  }
+  summaryCacheKey = month;
+  summaryCachePromise = api(`/summary?month=${month}`).catch((err) => {
+    if (summaryCacheKey === month) {
+      summaryCacheKey = null;
+      summaryCachePromise = null;
+    }
+    throw err;
+  });
+  return summaryCachePromise;
 }
 
 function formatDate(value) {
