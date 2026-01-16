@@ -16,8 +16,7 @@
           <a id="websms-top-link" class="ghost-link hidden" href="/websms.html">WebSMS</a>
         </nav>
         <div class="topbar-mobile">
-          <button id="nav-menu-btn" class="ghost" type="button">메뉴</button>
-          <div id="nav-menu-panel" class="menu-panel hidden">
+          <div class="topbar-mobile-links">
             <a class="ghost-link" href="/">홈</a>
             <a id="assets-mobile-link" class="ghost-link" href="/assets.html">자산</a>
             <a id="transactions-mobile-link" class="ghost-link" href="/transactions.html">입출금</a>
@@ -63,8 +62,6 @@
     </div>
   `;
 
-  const navMenuBtn = document.getElementById("nav-menu-btn");
-  const navMenuPanel = document.getElementById("nav-menu-panel");
   const userMenuBtn = document.getElementById("user-menu-btn");
   const userMenuPanel = document.getElementById("user-menu-panel");
   const authStatus = document.getElementById("auth-status");
@@ -76,31 +73,6 @@
   const deleteAccountForm = document.getElementById("delete-account-form");
   const logoutBtn = document.getElementById("logout-btn");
 
-  function bindNavMenu() {
-    if (!navMenuBtn || !navMenuPanel) {
-      return;
-    }
-    if (navMenuBtn.dataset.bound === "true") {
-      return;
-    }
-    navMenuBtn.addEventListener("click", () => {
-      navMenuPanel.classList.toggle("hidden");
-    });
-    navMenuPanel.addEventListener("click", (event) => {
-      if (event.target.closest("a")) {
-        navMenuPanel.classList.add("hidden");
-      }
-    });
-    document.addEventListener("click", (event) => {
-      if (!navMenuPanel.classList.contains("hidden")) {
-        const isInside = event.target.closest(".topbar-mobile");
-        if (!isInside) {
-          navMenuPanel.classList.add("hidden");
-        }
-      }
-    });
-    navMenuBtn.dataset.bound = "true";
-  }
 
   function bindUserMenu() {
     if (!userMenuBtn || !userMenuPanel) {
@@ -342,7 +314,6 @@
     activeGroupId = null
   } = {}) => {
     applyPermissions(permissions, role, isAuthenticated);
-    bindNavMenu();
     bindUserMenu();
     bindUserMenuToggles();
     bindUserActions();

@@ -76,6 +76,13 @@ body {
   display: none;
 }
 
+.topbar-mobile-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
 .requires-auth {
   display: none;
 }
@@ -691,17 +698,6 @@ button.ghost {
 
   .topbar-mobile {
     display: block;
-  }
-
-  .topbar-mobile .menu-panel {
-    position: fixed;
-    top: 72px;
-    left: 6vw;
-    right: 6vw;
-    width: auto;
-    max-height: calc(100vh - 96px);
-    overflow-y: auto;
-    z-index: 100;
   }
 
   .table-wrap {
