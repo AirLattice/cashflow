@@ -74,6 +74,17 @@
   const logoutBtn = document.getElementById("logout-btn");
   const topbar = root.querySelector(".topbar");
 
+  function syncTopbarHeight() {
+    if (!topbar) {
+      return;
+    }
+    const height = topbar.getBoundingClientRect().height;
+    document.documentElement.style.setProperty("--topbar-height", `${height}px`);
+  }
+
+  function queueTopbarSync() {
+    requestAnimationFrame(syncTopbarHeight);
+  }
 
   function bindUserMenu() {
     if (!userMenuBtn || !userMenuPanel) {
@@ -241,7 +252,6 @@
       adminHomeMobileLink?.classList.add("hidden");
       websmsTopLink?.classList.add("hidden");
       websmsMobileLink?.classList.add("hidden");
-      navMenuPanel?.classList.add("hidden");
       userMenuPanel?.classList.add("hidden");
       userMenuBtn?.classList.add("hidden");
       if (window.location.pathname !== "/") {
@@ -262,6 +272,7 @@
     websmsMobileLink?.classList.toggle("hidden", !isAdmin);
     userMenuBtn?.classList.remove("hidden");
     groupSwitch?.classList.remove("hidden");
+    queueTopbarSync();
   }
 
   async function loadGroups(activeGroupId) {
@@ -283,6 +294,7 @@
       if (activeGroupId) {
         groupSelect.value = String(activeGroupId);
       }
+      queueTopbarSync();
     } catch (err) {
       setStatus(err.message);
     }
@@ -316,18 +328,10 @@
   } = {}) => {
     applyPermissions(permissions, role, isAuthenticated);
     bindUserMenu();
-  bindUserMenuToggles();
-
-  function syncTopbarHeight() {
-    if (!topbar) {
-      return;
-    }
-    const height = topbar.getBoundingClientRect().height;
-    document.documentElement.style.setProperty("--topbar-height", `${height}px`);
-  }
-
-  window.addEventListener("resize", syncTopbarHeight);
-  syncTopbarHeight();
+    bindUserMenuToggles();
+    window.addEventListener("resize", syncTopbarHeight);
+    window.addEventListener("load", syncTopbarHeight);
+    queueTopbarSync();
     bindUserActions();
     if (userMenuBtn && username) {
       userMenuBtn.textContent = username;
